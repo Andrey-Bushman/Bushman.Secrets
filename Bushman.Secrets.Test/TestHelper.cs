@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography.X509Certificates;
+﻿// TestHelper.cs
+using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using Bushman.Secrets.Abstractions.Services;
@@ -7,7 +8,7 @@ using Bushman.Secrets.Abstractions.Models;
 
 namespace Bushman.Secrets.Test {
     public static class TestHelper {
-        public static ISecretOptions CreateRSAEncryptorOptions(ISecretFactory secretFactory) {
+        public static ISecretOptions CreateEncryptorOptions(ISecretFactory secretFactory) {
 
             if (secretFactory == null) throw new ArgumentNullException(nameof(secretFactory));
 

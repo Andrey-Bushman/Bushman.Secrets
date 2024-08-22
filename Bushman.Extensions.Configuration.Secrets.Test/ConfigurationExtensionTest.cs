@@ -9,15 +9,25 @@ using System.IO;
 namespace Bushman.Extensions.Configuration.Secrets.Test {
     [TestClass]
     public class ConfigurationExtensionTest {
+
         [TestMethod]
         public void TestMethod1() {
 
+            ISecretFactoryProvider secretFactoryProvider = new SecretFactoryProvider();
+
             var value = "Hello World";
 
-            ISecretFactory secretFactory = new SecretFactory();
+            // Получение фабрики секретов...
+
+            // Вариант #1: по имени сборки. Этот способ подходит только если в сборке определено не более одной фабрики секретов.
+            // ISecretFactory secretFactory = secretFactoryProvider.CreateSecretFactory("Bushman.Secrets");
+
+            // Вариант #2: по имени сборки и полному имени конкретного публичного класса фабрики.
+            ISecretFactory secretFactory = secretFactoryProvider.CreateSecretFactory("Bushman.Secrets", "Bushman.Secrets.Services.SecretFactory");
+
             IEncryptor encryptor = secretFactory.CreateEncryptor();
 
-            ISecret secret = secretFactory.CreateSecret(TestHelper.CreateRSAEncryptorOptions(secretFactory), value, false);
+            ISecret secret = secretFactory.CreateSecret(TestHelper.CreateEncryptorOptions(secretFactory), value, false);
             ISecret encryptedSecret = encryptor.Encrypt(secret);
 
             var text = $@"{{
@@ -34,7 +44,7 @@ namespace Bushman.Extensions.Configuration.Secrets.Test {
                 stream.Position = 0;
             }
 
-            var configRoot = new ConfigurationBuilder()
+            IConfigurationRoot configRoot = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonStream(stream)
                 .Build();
