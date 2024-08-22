@@ -237,18 +237,18 @@ namespace Bushman.Secrets.Services {
         public string Expand(ISecret secret) => secret.IsEncrypted ? Decrypt(secret).Data : secret.Data;
 
         /// <summary>
-        /// Выполнить в тексте операцию, указанную в параметре func над каждым секретом.
+        /// Распарсить текст в массив INode.
         /// </summary>
-        /// <param name="text">Текст, подлежащий обработке.</param>
-        /// <param name="func">Операция, которую нужно выполнить над каждым секретом.</param>
-        /// <returns>Строка, содержащая результат преобразований, выполненных над секретами.</returns>
-        /// <exception cref="ParsingException">В строке количество тегов закрытия секретов
-        /// не равно количеству тегов их открытия.</exception>
-        private string UpdateText(string text, Func<ISecret, ISecret> func = null) {
+        /// <param name="text">Текст, подлежащий парсингу.</param>
+        /// <returns>Экземпляр INodeCollection.</returns>
+        /// <exception cref="ArgumentNullException">В качестве параметра передан null.</exception>
+        /// <exception cref="ParsingException">Ошибка парсинга.</exception>
+        public INodeCollection ParseToNodes(string text) {
 
-            if (string.IsNullOrEmpty(text)) return text;
+            if (string.IsNullOrEmpty(text)) throw new ArgumentNullException(nameof(text));
 
             var secretLocations = new List<SecretLocation>();
+            var nodes = new List<INode>();
 
             foreach (var tagPair in new[] { OptionsBase.EncryptedTagPair, OptionsBase.DecryptedTagPair }) {
 
@@ -271,63 +271,68 @@ namespace Bushman.Secrets.Services {
                 }
             }
 
-            if (secretLocations.Count == 0) return text;
+            if (secretLocations.Count == 0) return new NodeCollection(new[] { new TextNode(0, text) });
 
             var orderedSecretLocations = secretLocations.OrderBy(n => n.StartIndex).ToArray();
-            var sb = new StringBuilder();
             var substringOffset = 0;
+            int nodeIndex = 0;
 
             foreach (var secretLocation in orderedSecretLocations) {
-                var substring = text.Substring(substringOffset, secretLocation.StartIndex - substringOffset);
-                sb.Append(substring);
 
-                if (func == null) {
-                    sb.Append(Expand(secretLocation.Secret));
-                }
-                else {
-                    sb.Append(func(secretLocation.Secret));
-                }
+                var substring = text.Substring(substringOffset, secretLocation.StartIndex - substringOffset);
+
+                if (!string.IsNullOrEmpty(substring)) nodes.Add(new TextNode(nodeIndex++, substring));
+
+                nodes.Add(new SecretNode(nodeIndex++, secretLocation));
+
                 substringOffset = secretLocation.EndIndex;
             }
-            sb.Append(text.Substring(substringOffset));
-            return sb.ToString();
+
+            var tail = text.Substring(substringOffset);
+            if (!string.IsNullOrEmpty(tail)) nodes.Add(new TextNode(nodeIndex++, tail));
+
+            return new NodeCollection(nodes.ToArray());
         }
 
         /// <summary>
-        /// Информация о расположении секрета в тексте.
+        /// Выполнить в тексте операцию, указанную в параметре func над каждым секретом.
         /// </summary>
-        private sealed class SecretLocation {
-            /// <summary>
-            /// Конструктор класса.
-            /// </summary>
-            /// <param name="startIndex">Индекс, с которого начинается секрет в тексте.</param>
-            /// <param name="endIndex">Индекс, следующий за окончанием секрета в тексте.</param>
-            /// <param name="secret">Секрет, размещённый в тексте.</param>
-            /// <exception cref="ArgumentException">Значение индекса меньше нуля.</exception>
-            /// <exception cref="ArgumentNullException">Вместо секрета указан null.</exception>
-            public SecretLocation(int startIndex, int endIndex, ISecret secret) {
+        /// <param name="text">Текст, подлежащий обработке.</param>
+        /// <param name="func">Операция, которую нужно выполнить над каждым секретом.</param>
+        /// <returns>Строка, содержащая результат преобразований, выполненных над секретами.</returns>
+        /// <exception cref="ParsingException">В строке количество тегов закрытия секретов
+        /// не равно количеству тегов их открытия.</exception>
+        private string UpdateText(string text, Func<ISecret, ISecret> func = null) {
 
-                if (startIndex < 0) throw new ArgumentException($"Значение параметра {nameof(startIndex)} не должно быть меньше нуля.");
-                if (endIndex < 0) throw new ArgumentException($"Значение параметра {nameof(endIndex)} не должно быть меньше нуля.");
-                if (secret == null) throw new ArgumentNullException(nameof(secret));
+            if (string.IsNullOrEmpty(text)) return text;
 
-                StartIndex = startIndex;
-                EndIndex = endIndex;
-                Secret = secret;
+            var nodes = ParseToNodes(text);
+            var sb = new StringBuilder();
+
+            foreach (var node in nodes.OrderBy(n => n.Index)) {
+
+                if (node.NodeType == NodeType.Text) {
+
+                    var textNode = (ITextNode)node;
+                    sb.Append(textNode.Value);
+                }
+                else if (node.NodeType == NodeType.Secret) {
+
+                    var secretNode = (ISecretNode)node;
+
+                    if (func == null) {
+                        sb.Append(Expand(secretNode.Value.Secret));
+                    }
+                    else {
+                        sb.Append(func(secretNode.Value.Secret));
+                    }
+                }
+                else {
+                    throw new ParsingException($"Не ожиданное значение перечисления {nameof(NodeType)}: {node.NodeType}.");
+                }
             }
 
-            /// <summary>
-            /// Индекс, с которого начинается секрет в тексте.
-            /// </summary>
-            public int StartIndex { get; }
-            /// <summary>
-            /// Индекс, следующий за окончанием секрета в тексте.
-            /// </summary>
-            public int EndIndex { get; }
-            /// <summary>
-            /// Секрет, размещённый в тексте.
-            /// </summary>
-            public ISecret Secret { get; }
+            return sb.ToString();
         }
     }
 }
