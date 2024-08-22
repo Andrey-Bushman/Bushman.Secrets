@@ -7,6 +7,12 @@ namespace Bushman.Secrets.Models {
     /// Базовые настройки для работы с секретами.
     /// </summary>
     public sealed class SecretOptionsBase : ISecretOptionsBase {
+
+        public static readonly ITagPair DefaultEncryptedTagPair = new TagPair("%%ENCRYPTED", "ENCRYPTED%%");
+        public static readonly ITagPair DefaultDecryptedTagPair = new TagPair("%%DECRYPTED", "DECRYPTED%%");
+        public const char DefaultFieldSeparator = '|';
+        public static readonly Encoding DefaultEncoding = Encoding.UTF8;
+
         /// <summary>
         /// Конструктор класса.
         /// </summary>
@@ -31,10 +37,10 @@ namespace Bushman.Secrets.Models {
         /// </summary>
         public SecretOptionsBase() {
 
-            FieldSeparator = '|';
-            EncryptedTagPair = new TagPair("%%ENCRYPTED", "ENCRYPTED%%");
-            DecryptedTagPair = new TagPair("%%DECRYPTED", "DECRYPTED%%");
-            Encoding = Encoding.UTF8;
+            FieldSeparator = DefaultFieldSeparator;
+            EncryptedTagPair = DefaultEncryptedTagPair;
+            DecryptedTagPair = DefaultDecryptedTagPair;
+            Encoding = DefaultEncoding;
         }
         /// <summary>
         /// Теги расшифрованного секрета.

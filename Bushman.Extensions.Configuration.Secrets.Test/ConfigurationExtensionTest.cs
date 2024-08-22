@@ -8,7 +8,7 @@ using System.IO;
 
 namespace Bushman.Extensions.Configuration.Secrets.Test {
     [TestClass]
-    public class ConfigurationExtensionTest {
+    public sealed class ConfigurationExtensionTest {
 
         [TestMethod]
         public void TestMethod1() {
@@ -19,11 +19,17 @@ namespace Bushman.Extensions.Configuration.Secrets.Test {
 
             // Получение фабрики секретов...
 
-            // Вариант #1: по имени сборки. Этот способ подходит только если в сборке определено не более одной фабрики секретов.
-            // ISecretFactory secretFactory = secretFactoryProvider.CreateSecretFactory("Bushman.Secrets");
+            string assemblyName = "Bushman.Secrets";
+            string className = "Bushman.Secrets.Services.SecretFactory";
+
+            // Вариант #1: по имени сборки. ВНИМАНИЕ! Этот способ подходит только если в сборке определено
+            // не более одной фабрики секретов!
+            ISecretFactory secretFactory1 = secretFactoryProvider.CreateSecretFactory(assemblyName);
 
             // Вариант #2: по имени сборки и полному имени конкретного публичного класса фабрики.
-            ISecretFactory secretFactory = secretFactoryProvider.CreateSecretFactory("Bushman.Secrets", "Bushman.Secrets.Services.SecretFactory");
+            ISecretFactory secretFactory2 = secretFactoryProvider.CreateSecretFactory(assemblyName, className);
+
+            ISecretFactory secretFactory = secretFactory2;
 
             IEncryptor encryptor = secretFactory.CreateEncryptor();
 

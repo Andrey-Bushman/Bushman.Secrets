@@ -1,12 +1,11 @@
-﻿// EncryptorTest.cs
-using Bushman.Secrets.Abstractions.Models;
+﻿using Bushman.Secrets.Abstractions.Models;
 using Bushman.Secrets.Abstractions.Services;
 using Bushman.Secrets.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Bushman.Secrets.Test {
     [TestClass]
-    public class EncryptorTest {
+    public sealed class EncryptorTest {
 
         [TestMethod]
         [DataRow("Hello, World!")]
@@ -21,11 +20,17 @@ namespace Bushman.Secrets.Test {
 
             // Получение фабрики секретов...
 
-            // Вариант #1: по имени сборки. Этот способ подходит только если в сборке определено не более одной фабрики секретов.
-            // ISecretFactory secretFactory = secretFactoryProvider.CreateSecretFactory("Bushman.Secrets");
+            string assemblyName = "Bushman.Secrets";
+            string className = "Bushman.Secrets.Services.SecretFactory";
+
+            // Вариант #1: по имени сборки. ВНИМАНИЕ! Этот способ подходит только если в сборке определено
+            // не более одной фабрики секретов!
+            ISecretFactory secretFactory1 = secretFactoryProvider.CreateSecretFactory(assemblyName);
 
             // Вариант #2: по имени сборки и полному имени конкретного публичного класса фабрики.
-            ISecretFactory secretFactory = secretFactoryProvider.CreateSecretFactory("Bushman.Secrets", "Bushman.Secrets.Services.SecretFactory");
+            ISecretFactory secretFactory2 = secretFactoryProvider.CreateSecretFactory(assemblyName, className);
+
+            ISecretFactory secretFactory = secretFactory2;
 
             IEncryptor encryptor = secretFactory.CreateEncryptor();
 
@@ -63,17 +68,24 @@ namespace Bushman.Secrets.Test {
         [TestMethod]
         public void RSAEncryptor_process_strings_with_secrets_correctly() {
 
-            var value = "Hello World";
+            string value = "Hello World";
 
             ISecretFactoryProvider secretFactoryProvider = new SecretFactoryProvider();
 
             // Получение фабрики секретов...
 
-            // Вариант #1: по имени сборки. Этот способ подходит только если в сборке определено не более одной фабрики секретов.
-            // ISecretFactory secretFactory = secretFactoryProvider.CreateSecretFactory("Bushman.Secrets");
+            string assemblyName = "Bushman.Secrets";
+            string className = "Bushman.Secrets.Services.SecretFactory";
+
+            // Вариант #1: по имени сборки. ВНИМАНИЕ! Этот способ подходит только если в сборке определено
+            // не более одной фабрики секретов!
+            ISecretFactory secretFactory1 = secretFactoryProvider.CreateSecretFactory(assemblyName);
 
             // Вариант #2: по имени сборки и полному имени конкретного публичного класса фабрики.
-            ISecretFactory secretFactory = secretFactoryProvider.CreateSecretFactory("Bushman.Secrets", "Bushman.Secrets.Services.SecretFactory");
+            ISecretFactory secretFactory2 = secretFactoryProvider.CreateSecretFactory(assemblyName, className);
+
+            ISecretFactory secretFactory = secretFactory2;
+
             IEncryptor encryptor = secretFactory.CreateEncryptor();
 
             // Создаём расшифрованный секрет.
@@ -83,7 +95,7 @@ namespace Bushman.Secrets.Test {
 
             // Тестовая строка, содержащая распакованное значение,
             // а так же расшифрованный и зашифрованный секреты.
-            var text = $@"{{
+            string text = $@"{{
                 ""prop1"": ""{value}"",
                 ""prop2"": ""{secret}"",
                 ""prop3"": ""{encryptedSecret}""
