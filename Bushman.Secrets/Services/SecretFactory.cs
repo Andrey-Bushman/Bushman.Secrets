@@ -9,15 +9,14 @@ namespace Bushman.Secrets.Services {
     /// <summary>
     /// Фабрика для создания экземпляров интерфейсов, необходимых для работы с секретами.
     /// </summary>
-    public sealed class SecretFactory: ISecretFactory {
+    public sealed class SecretFactory : ISecretFactory {
         /// <summary>
-        /// Создать экземпляр секрета.
+        /// Создать экземпляр незашифрованного секрета.
         /// </summary>
         /// <param name="options">Настройки секрета.</param>
         /// <param name="data">Содержимое секрета.</param>
-        /// <param name="isEncrypted">True - содержимое секрета зашифровано. False - расшифровано.</param>
         /// <returns>Экземпляр ISecret.</returns>
-        public ISecret CreateSecret(ISecretOptions options, string data, bool isEncrypted) => new Secret(options, data, isEncrypted);
+        public ISecret CreateDecryptedSecret(ISecretOptions options, string data) => new Secret(options, data, false);
         /// <summary>
         /// Создать настройки секрета.
         /// </summary>

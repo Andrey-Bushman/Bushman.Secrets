@@ -33,12 +33,12 @@ namespace Bushman.Extensions.Configuration.Secrets.Test {
 
             IEncryptor encryptor = secretFactory.CreateEncryptor();
 
-            ISecret secret = secretFactory.CreateSecret(TestHelper.CreateEncryptorOptions(secretFactory), value, false);
-            ISecret encryptedSecret = encryptor.Encrypt(secret);
+            ISecret decryptedSecret = secretFactory.CreateDecryptedSecret(TestHelper.CreateSecretOptions(secretFactory), value);
+            ISecret encryptedSecret = encryptor.Encrypt(decryptedSecret);
 
             var text = $@"{{
                     ""prop1"": ""{value}"",
-                    ""prop2"": {{ ""prop2.1"": ""{secret}"" }},
+                    ""prop2"": {{ ""prop2.1"": ""{decryptedSecret}"" }},
                     ""prop3"": [ {{ ""prop3.1"": ""{encryptedSecret}"" }} ]
                 }}";
 

@@ -12,6 +12,7 @@ namespace Bushman.Secrets.Test {
     public sealed class SecretOptionsTest {
         [TestMethod]
         public void Custom_SecretOptions_work_fine() {
+
             ISecretFactoryProvider secretFactoryProvider = new SecretFactoryProvider();
 
             // Получение фабрики секретов...
@@ -78,7 +79,7 @@ namespace Bushman.Secrets.Test {
             string value = "Hello World";
 
             // Создаём незашифрованный секрет.
-            ISecret decryptedSecret = secretFactory.CreateSecret(options, value, false);
+            ISecret decryptedSecret = secretFactory.CreateDecryptedSecret(options, value);
 
             Assert.AreEqual(options, decryptedSecret.Options);
             Assert.AreEqual(options.OptionsBase, decryptedSecret.Options.OptionsBase);

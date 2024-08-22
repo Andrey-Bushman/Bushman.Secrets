@@ -43,13 +43,12 @@ namespace Bushman.Secrets.Abstractions.Services {
         /// <returns>Экземпляр ISecretOptions.</returns>
         ISecretOptions CreateSecretOptions(ISecretOptionsBase optionsBase, StoreLocation storeLocation, HashAlgorithmName hashAlgorithmName, string thumbprint);
         /// <summary>
-        /// Создать экземпляр секрета.
+        /// Создать экземпляр незашифрованного секрета.
         /// </summary>
         /// <param name="options">Настройки секрета.</param>
         /// <param name="data">Содержимое секрета.</param>
-        /// <param name="isEncrypted">True - содержимое секрета зашифровано. False - расшифровано.</param>
         /// <returns>Экземпляр ISecret.</returns>
-        ISecret CreateSecret(ISecretOptions options, string data, bool isEncrypted);
+        ISecret CreateDecryptedSecret(ISecretOptions options, string data);
         /// <summary>
         /// Создать экземпляр IEncryptor для парсинга, валидации, шифрования, расшифровки и распаковки секретов.
         /// </summary>

@@ -17,7 +17,7 @@ namespace Bushman.Secrets.Test {
         /// <param name="secretFactory">Фабрика секретов.</param>
         /// <returns>Экземпляр ISecretOptions.</returns>
         /// <exception cref="ArgumentNullException">В качестве параметра передан null.</exception>
-        public static ISecretOptions CreateEncryptorOptions(ISecretFactory secretFactory) {
+        public static ISecretOptions CreateSecretOptions(ISecretFactory secretFactory) {
 
             if (secretFactory == null) throw new ArgumentNullException(nameof(secretFactory));
 
@@ -37,9 +37,9 @@ namespace Bushman.Secrets.Test {
         /// <summary>
         /// Посчитать в исходном тексте (content) общее количество повторений некоторого фрагмента текста (value).
         /// </summary>
-        /// <param name="content">Текст, в котором необходимо выполнить поиск и подсчёт.</param>
+        /// <param name="content">Текст, в котором необходимо выполнить поиск и подсчёт количества значений (value).</param>
         /// <param name="value">Фрагмент текста, количество вхождений которого в исходном тексте (content) нужно посчитать.</param>
-        /// <returns>Количество вхождений указанного фрагмента (value) текста в исходный текст (content).</returns>
+        /// <returns>Количество вхождений указанного фрагмента (value) в исходном тексте (content).</returns>
         public static int GetValuesCount(string content, string value) => new Regex(value).Matches(content).Count;
     }
 }

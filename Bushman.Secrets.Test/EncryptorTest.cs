@@ -35,17 +35,17 @@ namespace Bushman.Secrets.Test {
             IEncryptor encryptor = secretFactory.CreateEncryptor();
 
             // Создаём незашифрованный секрет.
-            ISecret secret = secretFactory.CreateSecret(TestHelper.CreateEncryptorOptions(secretFactory), value, false);
+            ISecret decryptedSecret = secretFactory.CreateDecryptedSecret(TestHelper.CreateSecretOptions(secretFactory), value);
 
             // Создаём зашифрованный секрет.
-            ISecret encryptedSecret = encryptor.Encrypt(secret);
+            ISecret encryptedSecret = encryptor.Encrypt(decryptedSecret);
 
-            Assert.AreNotEqual(secret.ToString(), encryptedSecret.ToString());
+            Assert.AreNotEqual(decryptedSecret.ToString(), encryptedSecret.ToString());
 
             // Расшифровываем секрет.
-            ISecret decryptedSecret = encryptor.Decrypt(secret);
+            ISecret decryptedSecret2 = encryptor.Decrypt(decryptedSecret);
 
-            Assert.AreEqual(secret.ToString(), decryptedSecret.ToString());
+            Assert.AreEqual(decryptedSecret.ToString(), decryptedSecret2.ToString());
 
             // Распаковываем секрет.
             string expandedValue = encryptor.Expand(encryptedSecret);
@@ -89,15 +89,15 @@ namespace Bushman.Secrets.Test {
             IEncryptor encryptor = secretFactory.CreateEncryptor();
 
             // Создаём расшифрованный секрет.
-            ISecret secret = secretFactory.CreateSecret(TestHelper.CreateEncryptorOptions(secretFactory), value, false);
+            ISecret decryptedSecret = secretFactory.CreateDecryptedSecret(TestHelper.CreateSecretOptions(secretFactory), value);
             // Создаём зашифрованный секрет.
-            ISecret encryptedSecret = encryptor.Encrypt(secret);
+            ISecret encryptedSecret = encryptor.Encrypt(decryptedSecret);
 
             // Тестовая строка, содержащая распакованное значение,
             // а так же расшифрованный и зашифрованный секреты.
             string text = $@"{{
                 ""prop1"": ""{value}"",
-                ""prop2"": ""{secret}"",
+                ""prop2"": ""{decryptedSecret}"",
                 ""prop3"": ""{encryptedSecret}""
             }}";
 
