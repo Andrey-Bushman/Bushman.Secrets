@@ -51,7 +51,6 @@ namespace Bushman.Secrets.Services {
         /// <returns>Количество зашифрованных секретов в строке.</returns>
         public int GetEncryptedSecretsCount(string content) => new Regex(OptionsBase.EncryptedTagPair.OpenTag).Matches(content).Count;
 
-        public readonly Encoding Encoding = Encoding.UTF8;
         /// <summary>
         /// Выяснить, является ли полученная строка секретом (не важно, расшифрованным или зашифрованным).
         /// </summary>
@@ -160,7 +159,7 @@ namespace Bushman.Secrets.Services {
                 }
                 else {
                     using (rsa) {
-                        var data = Convert.ToBase64String(rsa.Encrypt(Encoding.GetBytes(secret.Data), encryptionPadding));
+                        var data = Convert.ToBase64String(rsa.Encrypt(OptionsBase.Encoding.GetBytes(secret.Data), encryptionPadding));
                         return new Secret(secret.Options, data, true);
                     }
                 }
@@ -205,7 +204,7 @@ namespace Bushman.Secrets.Services {
                 }
                 else {
                     using (rsa) {
-                        var data = Encoding.GetString(rsa.Decrypt(Convert.FromBase64String(secret.Data), encryptionPadding));
+                        var data = OptionsBase.Encoding.GetString(rsa.Decrypt(Convert.FromBase64String(secret.Data), encryptionPadding));
                         return new Secret(secret.Options, data, false);
                     }
                 }

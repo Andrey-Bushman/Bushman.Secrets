@@ -8,9 +8,21 @@ namespace Bushman.Secrets.Models {
     /// </summary>
     public sealed class SecretOptionsBase : ISecretOptionsBase {
 
+        /// <summary>
+        /// Значение по умолчанию для пары тегов зашифрованного секрета.
+        /// </summary>
         public static readonly ITagPair DefaultEncryptedTagPair = new TagPair("%%ENCRYPTED", "ENCRYPTED%%");
+        /// <summary>
+        /// Значение по умолчанию для пары тегов расшифрованного секрета.
+        /// </summary>
         public static readonly ITagPair DefaultDecryptedTagPair = new TagPair("%%DECRYPTED", "DECRYPTED%%");
+        /// <summary>
+        /// Значение по умолчанию для разделителя полей в секрете.
+        /// </summary>
         public const char DefaultFieldSeparator = '|';
+        /// <summary>
+        /// Значение по умолчанию для кодировки, в которой записывается содержимое свойства Data в секрете.
+        /// </summary>
         public static readonly Encoding DefaultEncoding = Encoding.UTF8;
 
         /// <summary>

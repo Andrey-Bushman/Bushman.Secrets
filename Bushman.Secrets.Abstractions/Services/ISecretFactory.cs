@@ -10,6 +10,12 @@ namespace Bushman.Secrets.Abstractions.Services {
     /// Фабрика для создания экземпляров интерфейсов, необходимых для работы с секретами.
     /// </summary>
     public interface ISecretFactory {
+        /// <summary>
+        /// Создать пару тегов.
+        /// </summary>
+        /// <param name="openTag">Тег начала секрета.</param>
+        /// <param name="closeTag">Тег окончания секрета.</param>
+        /// <returns></returns>
         ITagPair CreateTagPair(string openTag, string closeTag);
         /// <summary>
         /// Создать базовые настройки секретов.

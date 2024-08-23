@@ -1,8 +1,14 @@
 ﻿using System;
 
 namespace Bushman.Secrets.Abstractions.Exceptions {
-    public sealed class EmptyOptionsException: Exception {
+    /// <summary>
+    /// Исключение, генерируемое в случае отсутствия информации в настройках секрета.
+    /// </summary>
+    public sealed class EmptyOptionsException : Exception {
 
-        public EmptyOptionsException(): base("Невалидное строковое представление секрета: отсутствуют настройки шифрования данных.") { }
+        /// <summary>
+        /// Конструктор по умолчанию.
+        /// </summary>
+        public EmptyOptionsException() : base("Невалидное строковое представление секрета: отсутствуют настройки шифрования данных.") { }
     }
 }

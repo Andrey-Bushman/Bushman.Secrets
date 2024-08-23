@@ -90,8 +90,6 @@ namespace Bushman.Secrets.Services {
         /// </summary>
         /// <param name="text">Текст, подлежащий парсингу.</param>
         /// <returns>Экземпляр INodeCollection.</returns>
-        /// <exception cref="ArgumentNullException">В качестве параметра передан null.</exception>
-        /// <exception cref="ParsingException">Ошибка парсинга.</exception>
         INodeCollection ParseToNodes(string text);
     }
 }

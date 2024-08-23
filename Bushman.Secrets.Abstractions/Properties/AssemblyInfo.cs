@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Bushman.Secrets.Abstractions")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Абстрактная модель для работы с секретами в тексте.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Bushman")]
 [assembly: AssemblyProduct("Bushman.Secrets.Abstractions")]
 [assembly: AssemblyCopyright("Copyright ©  2024")]
 [assembly: AssemblyTrademark("")]
