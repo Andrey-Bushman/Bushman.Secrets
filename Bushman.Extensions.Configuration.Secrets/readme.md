@@ -8,12 +8,4 @@
 
 ## Секреты 
 
-Информацию о секретах читайте в файле `readme.md` проекта `Bushman.Secrets.Abstractions`.
-
-## Примеры работы с секретами
-
-Примеры кода смотрите в юнит-тестах проекта [Bushman.Secrets.Test](https://github.com/Andrey-Bushman/Bushman.Secrets/tree/master/Bushman.Secrets.Test).
-
-## Распаковка секретов в настройках приложений
-
-Примеры кода смотрите в юнит-тестах проекта [Bushman.Extensions.Configuration.Secrets.Test](https://github.com/Andrey-Bushman/Bushman.Secrets/tree/master/Bushman.Extensions.Configuration.Secrets.Test).
+Информацию о секретах и примеры их использования (в т.ч. для распаковки секретов в конфигурацонных настройках приложения) смотрите в файле `readme.md` проекта [Bushman.Secrets.Abstractions](https://www.nuget.org/packages/Bushman.Secrets.Abstractions).

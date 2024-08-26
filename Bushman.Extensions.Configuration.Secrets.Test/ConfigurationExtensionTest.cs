@@ -55,7 +55,13 @@ namespace Bushman.Extensions.Configuration.Secrets.Test {
                 .AddJsonStream(stream)
                 .Build();
 
-            configRoot.ExpandSecrets(secretFactory);
+            // На данный момент времени секреты в настройках приложения всё ещё не распакованы...
+
+            configRoot.ExpandSecrets(secretFactory); // Распаковываем все секреты в настройках приложения.
+
+            // Теперь все секреты в configRoot распакованы!
+
+            // ...
         }
     }
 }
