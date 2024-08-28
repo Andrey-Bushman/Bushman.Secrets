@@ -52,7 +52,7 @@ namespace ConsoleApp1 {
 
             IEncryptor encryptor = secretFactory.CreateEncryptor();
 
-            // 04. ВЫБИРАЕМ СЕРТИФИКАТ БУДЕМ ИСПОЛЬЗОВАТЬ ДЛЯ ШИФРОВАНИЯ И РАСШИФРОВКИ.
+            // 04. ВЫБИРАЕМ СЕРТИФИКАТ, КОТОРЫЙ БУДЕМ ИСПОЛЬЗОВАТЬ ДЛЯ ШИФРОВАНИЯ И РАСШИФРОВКИ.
 
             StoreLocation storeLocation = StoreLocation.CurrentUser; // Хранилище сертификатов.
 
