@@ -76,10 +76,8 @@ namespace ConsoleApp1 {
             ISecretOptions secretOptions = secretFactory.CreateSecretOptions(storeLocation,
                 HashAlgorithmName.SHA1, thumbprint);
 
-            // ПРИМЕРЫ БАЗОВЫХ ОПЕРАЦИЙ С СЕКРЕТАМИ.
-            // ----------------------------------------------------------------------------------
-
-            string value = "Hello, World!"; // Строка, представляющая собой конфиденциальную информацию.
+            // Строка, представляющая собой конфиденциальную информацию.
+            string value = "Hello, World!";
 
             // Создаём незашифрованный секрет.
             ISecret decryptedSecret = secretFactory.CreateDecryptedSecret(secretOptions, value);
@@ -113,7 +111,8 @@ namespace ConsoleApp1 {
 
             // На данный момент времени секреты в настройках приложения всё ещё не распакованы...
 
-            configRoot.ExpandSecrets(secretFactory); // Распаковываем все секреты в настройках приложения.
+            // Распаковываем все секреты в настройках приложения.
+            configRoot.ExpandSecrets(secretFactory);
 
             // Теперь все секреты в configRoot распакованы!
         }

@@ -20,7 +20,8 @@
 формат JSON. "Из коробки" эта платформа не предоставляет возможность шифровать и расшифровывать секции в таких
 файлах. Вместо этого Microsoft рекомендует для хранения секретов использовать такие платные хранилища секретов,
 как [Azure Key Vault](https://azure.microsoft.com/en-us/products/key-vault) или
-[HashiCorp Vault](https://www.vaultproject.io/).
+[HashiCorp Vault](https://www.vaultproject.io/). Текущий пакет создан в качестве простого, бесплатного
+альтернативного решения.
 
 ## Абстрактная модель секретов
 
@@ -89,6 +90,10 @@ SecretOpenTag|SecretStorage|HashAlgorithmName|Thumbprint|Data|SecretCloseTag
 
 ## Пример использования
 
+Предварительно подключите к своему проекту следующие пакеты:
+
+  * [Bushman.Secrets](https://www.nuget.org/packages/Bushman.Secrets)
+
 ```
 using Bushman.Secrets.Abstractions.Services;
 using Bushman.Secrets.Services;
@@ -143,7 +148,8 @@ namespace ConsoleApp1 {
             // ПРИМЕРЫ БАЗОВЫХ ОПЕРАЦИЙ С СЕКРЕТАМИ.
             // ----------------------------------------------------------------------------------
 
-            string value = "Hello, World!"; // Строка, представляющая собой конфиденциальную информацию.
+            // Строка, представляющая собой конфиденциальную информацию.
+            string value = "Hello, World!";
 
             // Создаём незашифрованный секрет.
             ISecret decryptedSecret = secretFactory.CreateDecryptedSecret(secretOptions, value);
@@ -184,7 +190,8 @@ namespace ConsoleApp1 {
 
             string expandedText = encryptor.Expand(text); // Распаковываем все секреты в тексте.
 
-            INodeCollection nodes = encryptor.ParseToNodes(text); // Парсим строку с секретами в коллекцию узлов.
+            // Парсим строку с секретами в коллекцию узлов.
+            INodeCollection nodes = encryptor.ParseToNodes(text);
 
             string text2 = nodes.ToString(); // На основе коллекции узлов формируем итоговую строку.
         }

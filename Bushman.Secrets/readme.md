@@ -68,7 +68,8 @@ namespace ConsoleApp1 {
             // ПРИМЕРЫ БАЗОВЫХ ОПЕРАЦИЙ С СЕКРЕТАМИ.
             // ----------------------------------------------------------------------------------
 
-            string value = "Hello, World!"; // Строка, представляющая собой конфиденциальную информацию.
+            // Строка, представляющая собой конфиденциальную информацию.
+            string value = "Hello, World!";
 
             // Создаём незашифрованный секрет.
             ISecret decryptedSecret = secretFactory.CreateDecryptedSecret(secretOptions, value);
@@ -109,7 +110,8 @@ namespace ConsoleApp1 {
 
             string expandedText = encryptor.Expand(text); // Распаковываем все секреты в тексте.
 
-            INodeCollection nodes = encryptor.ParseToNodes(text); // Парсим строку с секретами в коллекцию узлов.
+            // Парсим строку с секретами в коллекцию узлов.
+            INodeCollection nodes = encryptor.ParseToNodes(text);
 
             string text2 = nodes.ToString(); // На основе коллекции узлов формируем итоговую строку.
         }
