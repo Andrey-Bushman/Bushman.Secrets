@@ -1,39 +1,54 @@
 
 # Bushman.Secrets.Abstractions
 
-## Причина создания
+Абстрактная модель для работы с секретами в составе текста.
+
+## Назначение пакета
+
+Предоставление уровня абстракции для шифрования и расшифровки секретов в тексте.
 
 В приложениях, написанных на **.Net Framework**, конфигурационные файлы обычно имеют формат XML. "Из коробки"
 эта платформа предоставляет возможность шифровать и расшифровывать секции в подобных файлах, дабы скрывать или
 отображать секреты: логины, пароли, строки подключения и URL различных сервисов.
 
-Однако порой возникает необходимость хранить зашифрованные секреты и в других местах: в JSON-файлах конфигураций,
-в SQL базах данных, в записях CRM, в реестре Windows, а порой они могут понадобиться и в логах. Помимо
-этого, может возникать необходимость отправлять зашифрованные секреты по почте или через мессенджеры,
-а так же сохранять их в git-репозиториях (например, в составе конфигурационных файлов).
+Однако порой возникает необходимость хранить зашифрованные секреты и в других местах: в произвольных текстовых
+файлах или в JSON-файлах, в SQL базах данных, в записях CRM, в реестре Windows, а порой они могут понадобиться
+и в логах. Помимо этого, может возникать необходимость отправлять зашифрованные секреты по почте или через
+мессенджеры, а так же сохранять их в git-репозиториях (например, в составе конфигурационных файлов).
 
 В приложениях, написанных на **.NET** (в отличии от **.Net Framework**), конфигурационные файлы обычно имеют
 формат JSON. "Из коробки" эта платформа не предоставляет возможность шифровать и расшифровывать секции в таких
 файлах. Вместо этого Microsoft рекомендует для хранения секретов использовать такие платные хранилища секретов,
-как `Azure Key Vault` или `HashiCorp Vault`.
+как [Azure Key Vault](https://azure.microsoft.com/en-us/products/key-vault) или
+[HashiCorp Vault](https://www.vaultproject.io/).
 
-Пакет `Bushman.Secrets.Abstractions` предоставляет абстрактную модель для создания, парсинга, шифрования, расшифровки
-и _распаковки_ секретов в тексте. Реализация этой абстрактной модели находится в пакете `Bushman.Secrets`.
-Все операции шифрования и расшифровки выполняются на основе сертификатов.
+## Абстрактная модель секретов
+
+Пакет [Bushman.Secrets.Abstractions](https://www.nuget.org/packages/Bushman.Secrets.Abstractions) предоставляет
+простую абстрактную модель для создания, парсинга, шифрования, расшифровки и _распаковки_ секретов непосредственно
+в произвольном тексте.
+
+## Реализация абстрактной модели секретов
+
+Реализацию этой модели предоставляет пакет [Bushman.Secrets](https://www.nuget.org/packages/Bushman.Secrets).
+
+Все операции шифрования и расшифровки выполняются на основе сертификатов, установленных на локальной машине в
+хранилищах сертификатов.
 
 Для того, чтобы при запуске приложения в объектной модели конфигурационных настроек, представленной интерфейсами
-`Microsoft.Extensions.Configuration.IConfigurationRoot` или `Microsoft.Extensions.Configuration.IConfiguration`
-выполнить распаковку всех секретов в памяти, можно использовать пакет `Bushman.Extensions.Configuration.Secrets`,
-в составе которого для интерфейса `Microsoft.Extensions.Configuration.IConfiguration` определён метод расширения
-`ExpandSecrets()` (см. ниже раздел _Распаковка секретов в настройках приложения_).
+[Microsoft.Extensions.Configuration.IConfigurationRoot](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.configuration.iconfigurationroot?view=net-8.0)
+или [Microsoft.Extensions.Configuration.IConfiguration](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.configuration.iconfiguration?view=net-8.0)
+выполнить распаковку всех секретов в памяти, можно использовать пакет [Bushman.Extensions.Configuration.Secrets](https://www.nuget.org/packages/Bushman.Extensions.Configuration.Secrets),
+в составе которого определён метод расширения `ExpandSecrets()` для интерфейса
+[Microsoft.Extensions.Configuration.IConfiguration](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.configuration.iconfiguration?view=net-8.0).
 
-## О форме записи секретов 
+## Секреты
 
-Секреты записываются в особом формате, позволяющем без проблем идентифицировать их в тексте. Каждый секрет может находиться в одном из
-двух состояний: в расшифрованном или зашифрованном.
+Для того, чтобы секреты можно было распознать в тексте, они записываются в специальном формате. Каждый секрет может находиться в одном из
+двух состояний: _расшифрованном_ или _зашифрованном_.
 
-При использовании пакета `Bushman.Secrets`, JSON-файл с записанными в нём секретами как в качестве непосредственных значений (см. `prop2`
-и `prop4`), так и в составе произвольного текста (см. `prop3` и `prop5`), может выглядеть, например, так:
+Пример текстового JSON-файла, с секретами, записанными как в качестве непосредственных значений (см. `prop2`
+и `prop4`), так и в составе произвольного текстового значения (см. `prop3` и `prop5`):
 
 ```
 {
@@ -47,11 +62,13 @@
 }
 ```
 
-_Распаковкой_ секрета называется его замена в тексте на хранящееся в нём расшифрованное значение. Например,
+_Распаковкой_ секрета называется его замена в тексте на хранящееся в нём _расшифрованное_ значение. Например,
 если в свойствах `prop2` и `prop4` приведённого выше JSON-файла выполнить _распаковку_ секретов, то значения
 этих свойств станут таким же, как у свойства `prop1`.
 
-Общая схема записи секрета в тексте следующая:
+### Структура секрета
+
+Общая структура записи секрета в тексте следующая:
 
 ```
 SecretOpenTag|SecretStorage|HashAlgorithmName|Thumbprint|Data|SecretCloseTag
@@ -70,260 +87,47 @@ SecretOpenTag|SecretStorage|HashAlgorithmName|Thumbprint|Data|SecretCloseTag
 
 В качестве разделителя полей используется `|`. Этот символ разрешено использовать в т.ч. и в тексте, сохраняемом в поле `Data`.
 
-## Примеры работы с секретами
-
-В качестве наглядных примеров, демонстрирующих работу с секретами, ниже приведены юнит-тесты.
-
-Вспомогательный класс, для использования в приведённых ниже юнит-тестах:
+## Пример использования
 
 ```
-using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
-using Bushman.Secrets.Abstractions.Services;
-using System;
-using Bushman.Secrets.Abstractions.Models;
-
-namespace Bushman.Secrets.Test {
-    /// <summary>
-    /// Статический класс, предоставляющий набор вспомогательных методов, используемых в тестах.
-    /// </summary>
-    public static class TestHelper {
-        /// <summary>
-        /// Создать экземпляр ISecretOptions на основе произвольного сертификата, доступного текущему
-        /// пользователю в его локальном хранилище.
-        /// </summary>
-        /// <param name="secretFactory">Фабрика секретов.</param>
-        /// <returns>Экземпляр ISecretOptions.</returns>
-        /// <exception cref="ArgumentNullException">В качестве параметра передан null.</exception>
-        public static ISecretOptions CreateSecretOptions(ISecretFactory secretFactory) {
-
-            if (secretFactory == null) throw new ArgumentNullException(nameof(secretFactory));
-
-            var storeLocation = StoreLocation.CurrentUser;
-
-            using (X509Store store = new X509Store(storeLocation)) {
-                store.Open(OpenFlags.ReadOnly);
-                X509Certificate2 certificate = store.Certificates[0];
-                store.Close();
-
-                using (certificate) {
-                    return secretFactory.CreateSecretOptions(storeLocation, HashAlgorithmName.SHA512, certificate.Thumbprint);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Посчитать в исходном тексте (content) общее количество повторений некоторого фрагмента текста (value).
-        /// </summary>
-        /// <param name="content">Текст, в котором необходимо выполнить поиск и подсчёт количества значений (value).</param>
-        /// <param name="value">Фрагмент текста, количество вхождений которого в исходном тексте (content) нужно посчитать.</param>
-        /// <returns>Количество вхождений указанного фрагмента (value) в исходном тексте (content).</returns>
-        public static int GetValuesCount(string content, string value) => new Regex(value).Matches(content).Count;
-    }
-}
-```
-
-Юнит-тесты по работе с секретами:
-
-```
-using Bushman.Secrets.Abstractions.Models;
 using Bushman.Secrets.Abstractions.Services;
 using Bushman.Secrets.Services;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography;
+using Bushman.Secrets.Abstractions.Models;
 
-namespace Bushman.Secrets.Test {
-    [TestClass]
-    public sealed class EncryptorTest {
+namespace ConsoleApp1 {
+    internal class Program {
+        static void Main(string[] args) {
 
-        [TestMethod]
-        [DataRow("Hello, World!")]
-        [DataRow("|Hello|World|")]
-        [DataRow("")]
-        [DataRow("|")]
-        [DataRow("|||")]
-        [DataRow("   ")]
-        public void Secret_operations_work_fine(string value) {
+            // 01. СОЗДАЁМ ПРОВАЙДЕР ФАБРИКИ СЕКРЕТОВ.
 
             ISecretFactoryProvider secretFactoryProvider = new SecretFactoryProvider();
 
-            // Получение фабрики секретов...
+            // 02. СОЗДАЁМ ФАБРИКУ СЕКРЕТОВ.
 
-            string assemblyName = "Bushman.Secrets";
-            string className = "Bushman.Secrets.Services.SecretFactory";
+            string secretFactoryAssemblyName = "Bushman.Secrets";
+            string secretFactoryClassName = "Bushman.Secrets.Services.SecretFactory";
 
-            // Вариант #1: по имени сборки. ВНИМАНИЕ! Этот способ подходит только если в сборке определено
-            // не более одной фабрики секретов!
-            ISecretFactory secretFactory1 = secretFactoryProvider.CreateSecretFactory(assemblyName);
+            ISecretFactory secretFactory = secretFactoryProvider.CreateSecretFactory(
+                secretFactoryAssemblyName, secretFactoryClassName);
 
-            // Вариант #2: по имени сборки и полному имени конкретного публичного класса фабрики.
-            ISecretFactory secretFactory2 = secretFactoryProvider.CreateSecretFactory(assemblyName, className);
-
-            ISecretFactory secretFactory = secretFactory2;
+            // 03. СОЗДАЁМ МЕХАНИЗМ ШИФРОВАНИЯ/РАСШИФРОВКИ.
 
             IEncryptor encryptor = secretFactory.CreateEncryptor();
 
-            // Создаём незашифрованный секрет.
-            ISecret decryptedSecret = secretFactory.CreateDecryptedSecret(TestHelper.CreateSecretOptions(secretFactory), value);
+            // 04. ВЫБИРАЕМ СЕРТИФИКАТ БУДЕМ ИСПОЛЬЗОВАТЬ ДЛЯ ШИФРОВАНИЯ И РАСШИФРОВКИ.
 
-            // Создаём зашифрованный секрет.
-            ISecret encryptedSecret = encryptor.Encrypt(decryptedSecret);
+            StoreLocation storeLocation = StoreLocation.CurrentUser; // Хранилище сертификатов.
 
-            Assert.AreNotEqual(decryptedSecret.ToString(), encryptedSecret.ToString());
-
-            // Расшифровываем секрет.
-            ISecret decryptedSecret2 = encryptor.Decrypt(decryptedSecret);
-
-            Assert.AreEqual(decryptedSecret.ToString(), decryptedSecret2.ToString());
-
-            // Распаковываем секрет.
-            string expandedValue = encryptor.Expand(encryptedSecret);
-
-            Assert.AreEqual(value, expandedValue);
-
-            // Получаем строковое представление секрета.
-            string encryptedSecretString = encryptedSecret.ToString();
-
-            Assert.IsTrue(encryptor.IsEncryptedSecret(encryptedSecretString));
-            Assert.IsFalse(encryptor.IsDecryptedSecret(encryptedSecretString));
-            Assert.IsTrue(encryptor.IsSecret(encryptedSecretString));
-
-            // Выполняем парсинг строкового представления секрета.
-            ISecret parsedSecret = encryptor.ParseSecret(encryptedSecretString);
-
-            Assert.AreEqual(encryptedSecretString, parsedSecret.ToString());
-        }
-
-        [TestMethod]
-        public void RSAEncryptor_process_strings_with_secrets_correctly() {
-
-            string value = "Hello World";
-
-            ISecretFactoryProvider secretFactoryProvider = new SecretFactoryProvider();
-
-            // Получение фабрики секретов...
-
-            string assemblyName = "Bushman.Secrets";
-            string className = "Bushman.Secrets.Services.SecretFactory";
-
-            // Вариант #1: по имени сборки. ВНИМАНИЕ! Этот способ подходит только если в сборке определено
-            // не более одной фабрики секретов!
-            ISecretFactory secretFactory1 = secretFactoryProvider.CreateSecretFactory(assemblyName);
-
-            // Вариант #2: по имени сборки и полному имени конкретного публичного класса фабрики.
-            ISecretFactory secretFactory2 = secretFactoryProvider.CreateSecretFactory(assemblyName, className);
-
-            ISecretFactory secretFactory = secretFactory2;
-
-            IEncryptor encryptor = secretFactory.CreateEncryptor();
-
-            // Создаём расшифрованный секрет.
-            ISecret decryptedSecret = secretFactory.CreateDecryptedSecret(TestHelper.CreateSecretOptions(secretFactory), value);
-            // Создаём зашифрованный секрет.
-            ISecret encryptedSecret = encryptor.Encrypt(decryptedSecret);
-
-            // Тестовая строка, содержащая распакованное значение,
-            // а так же расшифрованный и зашифрованный секреты.
-            string text = $@"{{
-                ""prop1"": ""{value}"",
-                ""prop2"": ""{decryptedSecret}"",
-                ""prop3"": ""{encryptedSecret}""
-            }}";
-
-            Assert.AreEqual(2, TestHelper.GetValuesCount(text, value));
-            Assert.AreEqual(1, encryptor.GetEncryptedSecretsCount(text));
-            Assert.AreEqual(1, encryptor.GetDecryptedSecretsCount(text));
-
-            var encryptedText = encryptor.Encrypt(text);
-
-            Assert.AreEqual(1, TestHelper.GetValuesCount(encryptedText, value));
-            Assert.AreEqual(2, encryptor.GetEncryptedSecretsCount(encryptedText));
-            Assert.AreEqual(0, encryptor.GetDecryptedSecretsCount(encryptedText));
-
-            var decryptedText = encryptor.Decrypt(text);
-
-            Assert.AreEqual(3, TestHelper.GetValuesCount(decryptedText, value));
-            Assert.AreEqual(0, encryptor.GetEncryptedSecretsCount(decryptedText));
-            Assert.AreEqual(2, encryptor.GetDecryptedSecretsCount(decryptedText));
-
-            var expandedText = encryptor.Expand(text);
-
-            Assert.AreEqual(3, TestHelper.GetValuesCount(expandedText, value));
-            Assert.AreEqual(0, encryptor.GetEncryptedSecretsCount(expandedText));
-            Assert.AreEqual(0, encryptor.GetDecryptedSecretsCount(expandedText));
-
-            INodeCollection nodes = encryptor.ParseToNodes(text);
-            string text2 = nodes.ToString();
-
-            Assert.AreEqual(text, text2);
-            Assert.AreEqual(5, nodes.Count);
-        }
-    }
-}
-```
-
-Юнит-тесты по созданию и использованию пользовательских настроек секретов:
-
-```
-using Bushman.Secrets.Abstractions.Models;
-using Bushman.Secrets.Abstractions.Services;
-using Bushman.Secrets.Models;
-using Bushman.Secrets.Services;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-
-namespace Bushman.Secrets.Test {
-    [TestClass]
-    public sealed class SecretOptionsTest {
-        [TestMethod]
-        public void Custom_SecretOptions_work_fine() {
-
-            ISecretFactoryProvider secretFactoryProvider = new SecretFactoryProvider();
-
-            // Получение фабрики секретов...
-
-            // Вариант #1: по имени сборки. Этот способ подходит только если в сборке определено не более одной фабрики секретов.
-            ISecretFactory secretFactory1 = secretFactoryProvider.CreateSecretFactory("Bushman.Secrets");
-
-            // Вариант #2: по имени сборки и полному имени конкретного публичного класса фабрики.
-            ISecretFactory secretFactory2 = secretFactoryProvider.CreateSecretFactory("Bushman.Secrets", "Bushman.Secrets.Services.SecretFactory");
-
-            ISecretFactory secretFactory = secretFactory2;
-
-            // Получение базовых настроек секретов...
-
-            // Вариант #1: Получение базовых настроек, используемых по умолчанию.
-            ISecretOptionsBase optionsBase1 = secretFactory.CreateSecretOptionsBase();
-
-            // Вариант #2: Результат тот же, что и у варианта #1.
-            ISecretOptionsBase optionsBase2 = secretFactory2.CreateSecretOptionsBase(
-                SecretOptionsBase.DefaultEncoding,
-                SecretOptionsBase.DefaultFieldSeparator,
-                SecretOptionsBase.DefaultEncryptedTagPair,
-                SecretOptionsBase.DefaultDecryptedTagPair);
-
-            // Вариант #3: Создать пользовательские базовые настройки, отличные от базовых настроек, используемых по умолчанию.
-
-            Encoding encoding = Encoding.UTF32;
-            char fieldSeparator = ':';
-            ITagPair encryptedTagPair = secretFactory.CreateTagPair("!!LOCKED", "LOCKED!!");
-            ITagPair decryptedTagPair = secretFactory.CreateTagPair("!!UNLOCKED", "UNLOCKED!!");
-
-            ISecretOptionsBase optionsBase3 = secretFactory.CreateSecretOptionsBase(encoding, fieldSeparator, encryptedTagPair, decryptedTagPair);
-
-            ISecretOptionsBase optionsBase = optionsBase3;
-
-            // Выбираем первый попавшийся сертификат из локального хранилища
-
-            var storeLocation = StoreLocation.CurrentUser;
-
-            string thumbprint = null; // Отпечаток сертификата.
+            string thumbprint = null; // Отпечаток интересующего нас сертификата.
 
             using (X509Store store = new X509Store(storeLocation)) {
                 store.Open(OpenFlags.ReadOnly);
+
+                // Для нашего примера берём первый попавшийся сертификат.
                 X509Certificate2 certificate = store.Certificates[0];
+
                 store.Close();
 
                 using (certificate) {
@@ -331,176 +135,58 @@ namespace Bushman.Secrets.Test {
                 }
             }
 
-            // Формируем настройки для работы с секретами.
+            // 05. ФОРМИРУЕМ НАСТРОЙКИ ДЛЯ РАБОТЫ С СЕКРЕТАМИ.
 
-            // Вариант #1: формирование настроек на основе базовых настроек, используемых по умолчанию.
+            ISecretOptions secretOptions = secretFactory.CreateSecretOptions(storeLocation,
+                HashAlgorithmName.SHA1, thumbprint);
 
-            ISecretOptions options1 = secretFactory.CreateSecretOptions(storeLocation, HashAlgorithmName.SHA1, thumbprint);
+            // ПРИМЕРЫ БАЗОВЫХ ОПЕРАЦИЙ С СЕКРЕТАМИ.
+            // ----------------------------------------------------------------------------------
 
-            // Вариант #2: формирование настроек на основе пользовательских базовых настроек.
-
-            ISecretOptions options2 = secretFactory.CreateSecretOptions(optionsBase, storeLocation, HashAlgorithmName.SHA1, thumbprint);
-
-            ISecretOptions options = options2;
-
-            string value = "Hello World";
+            string value = "Hello, World!"; // Строка, представляющая собой конфиденциальную информацию.
 
             // Создаём незашифрованный секрет.
-            ISecret decryptedSecret = secretFactory.CreateDecryptedSecret(options, value);
+            ISecret decryptedSecret = secretFactory.CreateDecryptedSecret(secretOptions, value);
 
-            Assert.AreEqual(options, decryptedSecret.Options);
-            Assert.AreEqual(options.OptionsBase, decryptedSecret.Options.OptionsBase);
-            Assert.AreEqual(value, decryptedSecret.Data);
-            Assert.IsFalse(decryptedSecret.IsEncrypted);
-
-            // Создаём экземпляр объекта, с помощью которого можно шифровать, расшифровывать, распаковывать, валидировать и парсить секреты.
-
-            // Вариант #1: Создать экземпляр IEncryptor на основе базовых настроек, используемых по умолчанию.
-            IEncryptor encryptor1 = secretFactory.CreateEncryptor();
-
-            // Вариант #2: Создать экземпляр IEncryptor на основе пользовательских базовых настроек.
-            IEncryptor encryptor2 = secretFactory.CreateEncryptor(optionsBase);
-
-            IEncryptor encryptor = encryptor2;
-
-            // Шифруем ранее созданный не зашифрованный секрет
+            // Шифруем секрет.
             ISecret encryptedSecret = encryptor.Encrypt(decryptedSecret);
 
-            Assert.AreEqual(decryptedSecret.Options, encryptedSecret.Options);
-            Assert.AreEqual(decryptedSecret.Options.OptionsBase, encryptedSecret.Options.OptionsBase);
-            Assert.AreNotEqual(decryptedSecret.Data, encryptedSecret.Data);
-            Assert.IsTrue(encryptedSecret.IsEncrypted);
+            // Расшифровываем секрет.
+            ISecret decryptedSecret2 = encryptor.Decrypt(decryptedSecret);
 
+            // Распаковываем секрет.
+            string expandedValue = encryptor.Expand(encryptedSecret);
+
+            // Получаем строковое представление секрета.
             string encryptedSecretString = encryptedSecret.ToString();
-            string decryptedSecretString = decryptedSecret.ToString();
 
-            Assert.AreNotEqual(encryptedSecretString, decryptedSecretString);
-        }
-    }
-}
-```
+            // Выполняем парсинг строкового представления секрета.
+            ISecret parsedSecret = encryptor.ParseSecret(encryptedSecretString);
 
-## Распаковка секретов в настройках приложений
+            bool isSecret = encryptor.IsSecret(encryptedSecretString); // true
+            bool isEncryptedSecret = encryptor.IsEncryptedSecret(encryptedSecretString); // true
+            bool isDecryptedSecret = encryptor.IsDecryptedSecret(encryptedSecretString); // false
 
-В качестве наглядных примеров, демонстрирующих работу с секретами, ниже приведены юнит-тесты.
+            // ПРИМЕРЫ БАЗОВЫХ ОПЕРАЦИЙ С СЕКРЕТАМИ, НАХОДЯЩИМИСЯ В СОСТАВЕ ПРОИЗВОЛЬНОГО ТЕКСТА.
+            // ----------------------------------------------------------------------------------
 
-Вспомогательный класс, для использования в приведённых ниже юнит-тестах:
+            // Тестовая строка, содержащая распакованное значение, а так же расшифрованный и
+            // зашифрованный секреты с этим же значением.
+            string text = $@"{{
+                ""prop1"": ""{value}"",
+                ""prop2"": ""{decryptedSecret}"",
+                ""prop3"": ""{encryptedSecret}""
+            }}";
 
-```
-using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
-using Bushman.Secrets.Abstractions.Services;
-using System;
-using Bushman.Secrets.Abstractions.Models;
+            string encryptedText = encryptor.Encrypt(text); // Зашифровываем все секреты в тексте.
 
-namespace Bushman.Secrets.Test {
-    /// <summary>
-    /// Статический класс, предоставляющий набор вспомогательных методов, используемых в тестах.
-    /// </summary>
-    public static class TestHelper {
-        /// <summary>
-        /// Создать экземпляр ISecretOptions на основе произвольного сертификата, доступного текущему
-        /// пользователю в его локальном хранилище.
-        /// </summary>
-        /// <param name="secretFactory">Фабрика секретов.</param>
-        /// <returns>Экземпляр ISecretOptions.</returns>
-        /// <exception cref="ArgumentNullException">В качестве параметра передан null.</exception>
-        public static ISecretOptions CreateSecretOptions(ISecretFactory secretFactory) {
+            string decryptedText = encryptor.Decrypt(text); // Расшифровываем все секреты в тексте.
 
-            if (secretFactory == null) throw new ArgumentNullException(nameof(secretFactory));
+            string expandedText = encryptor.Expand(text); // Распаковываем все секреты в тексте.
 
-            var storeLocation = StoreLocation.CurrentUser;
+            INodeCollection nodes = encryptor.ParseToNodes(text); // Парсим строку с секретами в коллекцию узлов.
 
-            using (X509Store store = new X509Store(storeLocation)) {
-                store.Open(OpenFlags.ReadOnly);
-                X509Certificate2 certificate = store.Certificates[0];
-                store.Close();
-
-                using (certificate) {
-                    return secretFactory.CreateSecretOptions(storeLocation, HashAlgorithmName.SHA512, certificate.Thumbprint);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Посчитать в исходном тексте (content) общее количество повторений некоторого фрагмента текста (value).
-        /// </summary>
-        /// <param name="content">Текст, в котором необходимо выполнить поиск и подсчёт количества значений (value).</param>
-        /// <param name="value">Фрагмент текста, количество вхождений которого в исходном тексте (content) нужно посчитать.</param>
-        /// <returns>Количество вхождений указанного фрагмента (value) в исходном тексте (content).</returns>
-        public static int GetValuesCount(string content, string value) => new Regex(value).Matches(content).Count;
-    }
-}
-```
-
-Юнит-тест с примером того, как следует распаковывать секреты, хранящиеся в конфигурационных настройках приложения:
-
-```
-using Bushman.Secrets.Abstractions.Models;
-using Bushman.Secrets.Abstractions.Services;
-using Bushman.Secrets.Services;
-using Bushman.Secrets.Test;
-using Microsoft.Extensions.Configuration;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.IO;
-
-namespace Bushman.Extensions.Configuration.Secrets.Test {
-    [TestClass]
-    public sealed class ConfigurationExtensionTest {
-
-        [TestMethod]
-        public void TestMethod1() {
-
-            ISecretFactoryProvider secretFactoryProvider = new SecretFactoryProvider();
-
-            var value = "Hello World";
-
-            // Получение фабрики секретов...
-
-            string assemblyName = "Bushman.Secrets";
-            string className = "Bushman.Secrets.Services.SecretFactory";
-
-            // Вариант #1: по имени сборки. ВНИМАНИЕ! Этот способ подходит только если в сборке определено
-            // не более одной фабрики секретов!
-            ISecretFactory secretFactory1 = secretFactoryProvider.CreateSecretFactory(assemblyName);
-
-            // Вариант #2: по имени сборки и полному имени конкретного публичного класса фабрики.
-            ISecretFactory secretFactory2 = secretFactoryProvider.CreateSecretFactory(assemblyName, className);
-
-            ISecretFactory secretFactory = secretFactory2;
-
-            IEncryptor encryptor = secretFactory.CreateEncryptor();
-
-            ISecret decryptedSecret = secretFactory.CreateDecryptedSecret(TestHelper.CreateSecretOptions(secretFactory), value);
-            ISecret encryptedSecret = encryptor.Encrypt(decryptedSecret);
-
-            var text = $@"{{
-                    ""prop1"": ""{value}"",
-                    ""prop2"": {{ ""prop2.1"": ""{decryptedSecret}"" }},
-                    ""prop3"": [ {{ ""prop3.1"": ""{encryptedSecret}"" }} ]
-                }}";
-
-            Stream stream = new MemoryStream(encryptor.OptionsBase.Encoding.GetByteCount(value));
-
-            using (var writer = new StreamWriter(stream, encryptor.OptionsBase.Encoding, 1024, true)) {
-                writer.Write(text);
-                writer.Flush();
-                stream.Position = 0;
-            }
-
-            IConfigurationRoot configRoot = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonStream(stream)
-                .Build();
-
-            // На данный момент времени секреты в настройках приложения всё ещё не распакованы...
-
-            configRoot.ExpandSecrets(secretFactory); // Распаковываем все секреты в настройках приложения.
-
-            // Теперь все секреты в configRoot распакованы!
-
-            // ...
+            string text2 = nodes.ToString(); // На основе коллекции узлов формируем итоговую строку.
         }
     }
 }
