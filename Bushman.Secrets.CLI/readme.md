@@ -1,9 +1,8 @@
 ﻿
 # secret (Bushman.Secrets.CLI)
 
-Консоль для шифрования, расшифрования и распаковки секретов в JSON-файлах.
-Используется модель секретов, определённая в пакете
-[Bushman.Secrets.Abstractions](https://www.nuget.org/packages/Bushman.Secrets.Abstractions/).
+Консоль для шифрования, расшифрования и распаковки секретов в текстовых файлах.
+Используется модель секретов, определённая в пакете [Bushman.Secrets.Abstractions](https://www.nuget.org/packages/Bushman.Secrets.Abstractions/).
 
 Порядок передачи параметров при запуске приложения не имеет значения.
 
