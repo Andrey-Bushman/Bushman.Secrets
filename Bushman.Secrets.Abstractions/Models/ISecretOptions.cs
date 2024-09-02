@@ -11,10 +11,6 @@ namespace Bushman.Secrets.Abstractions.Models {
         /// </summary>
         ISecretOptionsBase OptionsBase { get; }
         /// <summary>
-        /// Наименование алгоритма шифрования.
-        /// </summary>
-        HashAlgorithmName HashAlgorithmName { get; }
-        /// <summary>
         /// Хранилище сертификата.
         /// </summary>
         StoreLocation StoreLocation { get; }

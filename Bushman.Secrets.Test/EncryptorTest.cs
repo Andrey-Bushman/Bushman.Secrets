@@ -43,24 +43,34 @@ namespace Bushman.Secrets.Test {
             Assert.AreNotEqual(decryptedSecret.ToString(), encryptedSecret.ToString());
 
             // Расшифровываем секрет.
-            ISecret decryptedSecret2 = encryptor.Decrypt(decryptedSecret);
+            ISecret decryptedSecret2 = encryptor.Decrypt(encryptedSecret);
 
-            Assert.AreEqual(decryptedSecret.ToString(), decryptedSecret2.ToString());
+            
 
             // Распаковываем секрет.
             string expandedValue = encryptor.Expand(encryptedSecret);
 
-            Assert.AreEqual(value, expandedValue);
+            var valueBytes = encryptedSecret.Options.OptionsBase.Encoding.GetBytes(value);
+            var decryptedValueBytes = decryptedSecret.Options.OptionsBase.Encoding.GetBytes(decryptedSecret.Data);
+            var encryptedValueBytes = encryptedSecret.Options.OptionsBase.Encoding.GetBytes(encryptedSecret.Data);
+            var decryptedValueBytes2 = decryptedSecret2.Options.OptionsBase.Encoding.GetBytes(decryptedSecret2.Data);
+
+            var expandedValueBytes = decryptedSecret.Options.OptionsBase.Encoding.GetBytes(expandedValue);
 
             // Получаем строковое представление секрета.
             string encryptedSecretString = encryptedSecret.ToString();
 
+            // Выполняем парсинг строкового представления секрета.
+            ISecret parsedSecret = encryptor.ParseSecret(encryptedSecretString);
+
+            ISecret parsedSecret2 = encryptor.ParseSecret(decryptedSecret.ToString());
+
+            Assert.AreEqual(decryptedSecret.ToString(), decryptedSecret2.ToString());
+            Assert.AreEqual(value, expandedValue);
+
             Assert.IsTrue(encryptor.IsEncryptedSecret(encryptedSecretString));
             Assert.IsFalse(encryptor.IsDecryptedSecret(encryptedSecretString));
             Assert.IsTrue(encryptor.IsSecret(encryptedSecretString));
-
-            // Выполняем парсинг строкового представления секрета.
-            ISecret parsedSecret = encryptor.ParseSecret(encryptedSecretString);
 
             Assert.AreEqual(encryptedSecretString, parsedSecret.ToString());
         }

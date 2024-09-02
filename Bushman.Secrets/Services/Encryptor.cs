@@ -3,11 +3,14 @@ using Bushman.Secrets.Abstractions.Models;
 using Bushman.Secrets.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
+
+// https://learn.microsoft.com/ru-ru/dotnet/api/system.security.cryptography.x509certificates.x509certificate2?view=net-8.0
 
 namespace Bushman.Secrets.Services {
     /// <summary>
@@ -103,7 +106,7 @@ namespace Bushman.Secrets.Services {
 
             var secretInfo = secret.Substring(tagPair.OpenTag.Length + 1 /*ValueSeparator*/, endTagIndex - tagPair.OpenTag.Length - 1 /*ValueSeparator*/);
             var secretInfoValues = secretInfo.Split(OptionsBase.FieldSeparator);
-            var minExpectedCount = 4;
+            var minExpectedCount = 3;
 
             if (secretInfoValues.Length < minExpectedCount) throw new ParsingException(
                 $"Ожидаемое количество свойств в секрете: {minExpectedCount}. Фактическое: {secretInfoValues.Length}.");
@@ -112,11 +115,10 @@ namespace Bushman.Secrets.Services {
                 OptionsBase,
                 (StoreLocation)Enum.Parse(typeof(StoreLocation),
                 secretInfoValues[0].Trim()),
-                new HashAlgorithmName(secretInfoValues[1].Trim()),
-                secretInfoValues[2].Trim()
+                secretInfoValues[1].Trim()
             );
 
-            var secretData = string.Join($"{OptionsBase.FieldSeparator}", secretInfoValues.Skip(3));
+            var secretData = string.Join($"{OptionsBase.FieldSeparator}", secretInfoValues.Skip(2));
 
             return new Secret(options, secretData, isEncrypted);
         }
@@ -134,36 +136,83 @@ namespace Bushman.Secrets.Services {
                 return new Secret(secret.Options, secret.Data, true);
             }
 
-            RSAEncryptionPadding encryptionPadding = RSAEncryptionPadding.CreateOaep(secret.Options.HashAlgorithmName);
             X509Certificate2 certificate = null;
+            ISecret result = null;
 
             using (X509Store store = new X509Store(secret.Options.StoreLocation)) {
                 store.Open(OpenFlags.ReadOnly);
-                foreach (var item in store.Certificates) {
-                    if (item.Thumbprint.Equals(secret.Options.Thumbprint, StringComparison.InvariantCultureIgnoreCase)) {
-                        certificate = item;
-                        break;
+
+                var certificates = store.Certificates.Find(X509FindType.FindByThumbprint, secret.Options.Thumbprint, false);
+
+                if (certificates.Count > 0) {
+                    certificate = certificates[0];
+                }
+
+                if (certificate == null) {
+
+                    store.Close();
+
+                    throw new CryptographicException($"Сертификат {nameof(X509Certificate2)} с отпечатком \"{secret.Options.Thumbprint}\" не найден в хранилище {secret.Options.StoreLocation}.");
+                }
+
+                Aes aes = Aes.Create();
+                aes.KeySize = secret.Options.OptionsBase.AesKeySize;
+                aes.Mode = secret.Options.OptionsBase.AesCipherMode;
+
+                using (certificate)
+                using (aes)
+                using (ICryptoTransform transform = aes.CreateEncryptor()) {
+
+                    RSAPKCS1KeyExchangeFormatter keyFormatter = new RSAPKCS1KeyExchangeFormatter(certificate.GetRSAPublicKey());
+                    byte[] keyEncrypted = keyFormatter.CreateKeyExchange(aes.Key, aes.GetType());
+
+                    byte[] LenK = new byte[sizeof(int)];
+                    byte[] LenIV = new byte[sizeof(int)];
+
+                    LenK = BitConverter.GetBytes(keyEncrypted.Length);
+                    LenIV = BitConverter.GetBytes(aes.IV.Length);
+
+                    using (MemoryStream outputStream = new MemoryStream()) {
+                        outputStream.Write(LenK, 0, LenK.Length);
+                        outputStream.Write(LenIV, 0, LenIV.Length);
+                        outputStream.Write(keyEncrypted, 0, keyEncrypted.Length);
+                        outputStream.Write(aes.IV, 0, aes.IV.Length);
+
+                        using (CryptoStream outStreamEncrypted = new CryptoStream(outputStream, transform, CryptoStreamMode.Write)) {
+                            int count = 0;
+                            byte[] data = new byte[aes.BlockSize / 8];
+                            int bytesRead = 0;
+
+                            using (MemoryStream inputStream = new MemoryStream()) {
+
+                                using (var sw = new StreamWriter(inputStream, secret.Options.OptionsBase.Encoding, 1024, true)) {
+                                    sw.Write(secret.Data);
+                                    sw.Flush();
+                                }
+                                inputStream.Seek(0, SeekOrigin.Begin);
+
+                                do {
+                                    count = inputStream.Read(data, 0, data.Length);
+                                    outStreamEncrypted.Write(data, 0, count);
+                                    bytesRead += count;
+                                } while (count > 0);
+
+                                inputStream.Close();
+                            }
+                            outStreamEncrypted.FlushFinalBlock();
+                            outputStream.Flush();
+
+                            outputStream.Seek(0, SeekOrigin.Begin);
+                            string encryptedData = Convert.ToBase64String(outputStream.ToArray());
+                            result = new Secret(secret.Options, encryptedData, true);
+                            outStreamEncrypted.Close();
+                        }
+                        outputStream.Close();
                     }
                 }
                 store.Close();
             }
-
-            if (certificate == null) throw new CryptographicException(
-                $"Сертификат {nameof(X509Certificate2)} с отпечатком \"{secret.Options.Thumbprint}\" не найден в хранилище {secret.Options.StoreLocation}.");
-
-            using (certificate) {
-                RSA rsa = certificate.GetRSAPrivateKey();
-
-                if (rsa == null) {
-                    throw new CryptographicException($"Не удалось получить приватный ключ сертификата {nameof(X509Certificate2)} с отпечатком \"{secret.Options.Thumbprint}\" из хранилища {secret.Options.StoreLocation}.");
-                }
-                else {
-                    using (rsa) {
-                        var data = Convert.ToBase64String(rsa.Encrypt(OptionsBase.Encoding.GetBytes(secret.Data), encryptionPadding));
-                        return new Secret(secret.Options, data, true);
-                    }
-                }
-            }
+            return result;
         }
         /// <summary>
         /// Расшифровать секрет.
@@ -176,39 +225,80 @@ namespace Bushman.Secrets.Services {
             if (secret == null) throw new ArgumentNullException(nameof(secret));
             if (!secret.IsEncrypted) return secret;
             else if (string.IsNullOrWhiteSpace(secret.Data)) {
-                return new Secret(secret.Options, secret.Data, false);
+                return new Secret(secret.Options, secret.Data, true);
             }
 
-            RSAEncryptionPadding encryptionPadding = RSAEncryptionPadding.CreateOaep(secret.Options.HashAlgorithmName);
             X509Certificate2 certificate = null;
+            ISecret result = null;
 
             using (X509Store store = new X509Store(secret.Options.StoreLocation)) {
                 store.Open(OpenFlags.ReadOnly);
-                foreach (var item in store.Certificates) {
-                    if (item.Thumbprint.Equals(secret.Options.Thumbprint, StringComparison.InvariantCultureIgnoreCase)) {
-                        certificate = item;
-                        break;
+
+                var certificates = store.Certificates.Find(X509FindType.FindByThumbprint, secret.Options.Thumbprint, false);
+
+                if (certificates.Count > 0) {
+                    certificate = certificates[0];
+                }
+
+                if (certificate == null) {
+
+                    store.Close();
+
+                    throw new CryptographicException($"Сертификат {nameof(X509Certificate2)} с отпечатком \"{secret.Options.Thumbprint}\" не найден в хранилище {secret.Options.StoreLocation}.");
+                }
+
+                Aes aes = Aes.Create();
+                aes.KeySize = secret.Options.OptionsBase.AesKeySize;
+                aes.Mode = secret.Options.OptionsBase.AesCipherMode;
+
+                byte[] LenK = new byte[sizeof(int)];
+                byte[] LenIV = new byte[sizeof(int)];
+
+                using (MemoryStream inputStream = new MemoryStream()) {
+                    var encryptedBytes = Convert.FromBase64String(secret.Data);
+                    inputStream.Write(encryptedBytes, 0, encryptedBytes.Length);
+                    inputStream.Flush();
+
+                    inputStream.Seek(0, SeekOrigin.Begin);
+                    inputStream.Read(LenK, 0, LenK.Length);
+                    inputStream.Read(LenIV, 0, LenIV.Length);
+
+                    int lenK = BitConverter.ToInt32(LenK, 0);
+                    int lenIV = BitConverter.ToInt32(LenIV, 0);
+
+                    byte[] KeyEncrypted = new byte[lenK];
+                    byte[] IV = new byte[lenIV];
+
+                    inputStream.Read(KeyEncrypted, 0, lenK);
+                    inputStream.Read(IV, 0, lenIV);
+
+                    byte[] KeyDecrypted = certificate.GetRSAPrivateKey().Decrypt(KeyEncrypted, RSAEncryptionPadding.Pkcs1);
+
+                    using (ICryptoTransform transform = aes.CreateDecryptor(KeyDecrypted, IV)) {
+
+                        using (MemoryStream outputStream = new MemoryStream()) {
+                            int count = 0;                            
+                            byte[] data = new byte[aes.BlockSize / 8];
+
+                            using (CryptoStream outStreamEncrypted = new CryptoStream(outputStream, transform, CryptoStreamMode.Write)) {
+                                do {
+                                    count = inputStream.Read(data, 0, data.Length);
+                                    outStreamEncrypted.Write(data, 0, count);
+                                } while (count > 0);
+
+                                if (outStreamEncrypted.HasFlushedFinalBlock) outStreamEncrypted.FlushFinalBlock();
+
+                                outputStream.Seek(0, SeekOrigin.Begin);
+                                string decryptedData = secret.Options.OptionsBase.Encoding.GetString(outputStream.ToArray());
+                                result = new Secret(secret.Options, decryptedData, false);
+                                outStreamEncrypted.Close();
+                            }
+                        }
                     }
-                }
-                store.Close();
-            }
-
-            if (certificate == null) throw new CryptographicException(
-                $"Сертификат {nameof(X509Certificate2)} с отпечатком \"{secret.Options.Thumbprint}\" не найден в хранилище {secret.Options.StoreLocation}.");
-
-            using (certificate) {
-                RSA rsa = certificate.GetRSAPrivateKey();
-
-                if (rsa == null) {
-                    throw new CryptographicException($"Не удалось получить приватный ключ сертификата {nameof(X509Certificate2)} с отпечатком \"{secret.Options.Thumbprint}\" из хранилища {secret.Options.StoreLocation}.");
-                }
-                else {
-                    using (rsa) {
-                        var data = OptionsBase.Encoding.GetString(rsa.Decrypt(Convert.FromBase64String(secret.Data), encryptionPadding));
-                        return new Secret(secret.Options, data, false);
-                    }
+                    inputStream.Close();
                 }
             }
+            return result;
         }
         /// <summary>
         /// Зашифровать все секреты в составе строки.

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Security.Cryptography;
+using System.Text;
 
 namespace Bushman.Secrets.Abstractions.Models {
     /// <summary>
@@ -21,5 +22,15 @@ namespace Bushman.Secrets.Abstractions.Models {
         /// Разделитель значений в строковом представлении секрета.
         /// </summary>
         char FieldSeparator { get; }
+
+        /// <summary>
+        /// Размер секретного ключа в битах для симметричного алгоритма шифрования.
+        /// </summary>
+        int AesKeySize { get; }
+
+        /// <summary>
+        /// Режим операции симметричного алгоритма.
+        /// </summary>
+        CipherMode AesCipherMode { get; }
     }
 }

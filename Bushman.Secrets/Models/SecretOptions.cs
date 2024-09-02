@@ -13,13 +13,11 @@ namespace Bushman.Secrets.Models {
         /// </summary>
         /// <param name="optionsBase">Базовые настройки.</param>
         /// <param name="storeLocation">Хранилище сертификата.</param>
-        /// <param name="hashAlgorithmName">Наименование алгоритма шифрования.</param>
         /// <param name="thumbprint">Отпечаток сертификата.</param>
         /// <exception cref="ArgumentNullException">В качестве параметра передан null.</exception>
         public SecretOptions(
             ISecretOptionsBase optionsBase,
             StoreLocation storeLocation,
-            HashAlgorithmName hashAlgorithmName,
             string thumbprint) {
 
             if (optionsBase == null) throw new ArgumentNullException(nameof(optionsBase));
@@ -27,7 +25,6 @@ namespace Bushman.Secrets.Models {
 
             OptionsBase = optionsBase;
             StoreLocation = storeLocation;
-            HashAlgorithmName = hashAlgorithmName;
             Thumbprint = thumbprint;
         }
         /// <summary>
@@ -39,10 +36,6 @@ namespace Bushman.Secrets.Models {
         /// </summary>
         public StoreLocation StoreLocation { get; }
         /// <summary>
-        /// Наименование алгоритма шифрования.
-        /// </summary>
-        public HashAlgorithmName HashAlgorithmName { get; }
-        /// <summary>
         /// Отпечаток сертификата.
         /// </summary>
         public string Thumbprint { get; }
@@ -52,7 +45,7 @@ namespace Bushman.Secrets.Models {
         /// </summary>
         /// <returns>Строковое представление объекта.</returns>
         public override string ToString() {
-            return string.Join($"{OptionsBase.FieldSeparator}", StoreLocation, HashAlgorithmName, Thumbprint);
+            return string.Join($"{OptionsBase.FieldSeparator}", StoreLocation, Thumbprint);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Bushman.Secrets.Abstractions.Models;
 using System;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Bushman.Secrets.Models {
@@ -26,14 +27,26 @@ namespace Bushman.Secrets.Models {
         public static readonly Encoding DefaultEncoding = Encoding.UTF8;
 
         /// <summary>
+        /// Размер секретного ключа в битах для симметричного алгоритма шифрования.
+        /// </summary>
+        public int AesKeySize { get; }
+
+        /// <summary>
+        /// Режим операции симметричного алгоритма.
+        /// </summary>
+        public CipherMode AesCipherMode { get; }
+
+        /// <summary>
         /// Конструктор класса.
         /// </summary>
         /// <param name="encoding">Кодировка текстового представления секрета.</param>
         /// <param name="fieldSeparator">Разделитель значений в строковом представлении секрета.</param>
         /// <param name="encryptedTagPair">Теги зашифрованного секрета.</param>
         /// <param name="decryptedTagPair">Теги расшифрованного секрета.</param>
+        /// <param name="aesKeySize">Размер секретного ключа в битах для симметричного алгоритма шифрования.</param>
+        /// <param name="aesCipherMode">Режим операции симметричного алгоритма.</param>
         /// <exception cref="ArgumentNullException">В качестве параметра передан null.</exception>
-        public SecretOptionsBase(Encoding encoding, char fieldSeparator, ITagPair encryptedTagPair, ITagPair decryptedTagPair) {
+        public SecretOptionsBase(Encoding encoding, char fieldSeparator, ITagPair encryptedTagPair, ITagPair decryptedTagPair, int aesKeySize, CipherMode aesCipherMode) {
 
             if (encoding == null) throw new ArgumentNullException(nameof(encoding));
             if (encryptedTagPair == null) throw new ArgumentNullException(nameof(encryptedTagPair));
@@ -43,6 +56,8 @@ namespace Bushman.Secrets.Models {
             FieldSeparator = fieldSeparator;
             EncryptedTagPair = encryptedTagPair;
             DecryptedTagPair = decryptedTagPair;
+            AesKeySize = aesKeySize;
+            AesCipherMode = aesCipherMode;
         }
         /// <summary>
         /// Конструктор по умолчанию.
@@ -53,6 +68,8 @@ namespace Bushman.Secrets.Models {
             EncryptedTagPair = DefaultEncryptedTagPair;
             DecryptedTagPair = DefaultDecryptedTagPair;
             Encoding = DefaultEncoding;
+            AesKeySize = 256;
+            AesCipherMode = CipherMode.CBC;
         }
         /// <summary>
         /// Теги расшифрованного секрета.

@@ -1,6 +1,5 @@
 ﻿using Bushman.Secrets.Abstractions.Models;
 using Bushman.Secrets.Services;
-using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -29,25 +28,26 @@ namespace Bushman.Secrets.Abstractions.Services {
         /// <param name="fieldSeparator">Разделитель полей секрета.</param>
         /// <param name="encryptedTagPair">Пара тегов для зашифрованного секрета.</param>
         /// <param name="decryptedTagPair">Пара тегов для расшифрованного секрета.</param>
+        /// <param name="aesKeySize">Размер секретного ключа в битах для симметричного алгоритма шифрования.</param>
+        /// <param name="aesCipherMode">Режим операции симметричного алгоритма.</param>
         /// <returns>Экземпляр ISecretOptionsBase.</returns>
-        ISecretOptionsBase CreateSecretOptionsBase(Encoding encoding, char fieldSeparator, ITagPair encryptedTagPair, ITagPair decryptedTagPair);
+        ISecretOptionsBase CreateSecretOptionsBase(Encoding encoding, char fieldSeparator, ITagPair encryptedTagPair,
+            ITagPair decryptedTagPair, int aesKeySize, CipherMode aesCipherMode);
         /// <summary>
         /// Создать настройки секрета.
         /// </summary>
         /// <param name="storeLocation">Хранилище секрета.</param>
-        /// <param name="hashAlgorithmName">Наименование алгоритма шифрования.</param>
         /// <param name="thumbprint">Отпечаток сертификата.</param>
         /// <returns>Экземпляр ISecretOptions.</returns>
-        ISecretOptions CreateSecretOptions(StoreLocation storeLocation, HashAlgorithmName hashAlgorithmName, string thumbprint);
+        ISecretOptions CreateSecretOptions(StoreLocation storeLocation, string thumbprint);
         /// <summary>
         /// Создать настройки секрета.
         /// </summary>
         /// <param name="optionsBase">Базовые настройки секрета.</param>
         /// <param name="storeLocation">Хранилище секрета.</param>
-        /// <param name="hashAlgorithmName">Наименование алгоритма шифрования.</param>
         /// <param name="thumbprint">Отпечаток сертификата.</param>
         /// <returns>Экземпляр ISecretOptions.</returns>
-        ISecretOptions CreateSecretOptions(ISecretOptionsBase optionsBase, StoreLocation storeLocation, HashAlgorithmName hashAlgorithmName, string thumbprint);
+        ISecretOptions CreateSecretOptions(ISecretOptionsBase optionsBase, StoreLocation storeLocation, string thumbprint);
         /// <summary>
         /// Создать экземпляр незашифрованного секрета.
         /// </summary>

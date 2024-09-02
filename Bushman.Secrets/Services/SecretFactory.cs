@@ -20,22 +20,20 @@ namespace Bushman.Secrets.Services {
         /// <summary>
         /// Создать настройки секрета.
         /// </summary>
+        /// <param name="optionsBase">Базовые настройки секрета.</param>
         /// <param name="storeLocation">Хранилище секрета.</param>
-        /// <param name="hashAlgorithmName">Наименование алгоритма шифрования.</param>
         /// <param name="thumbprint">Отпечаток сертификата.</param>
         /// <returns>Экземпляр ISecretOptions.</returns>
-        public ISecretOptions CreateSecretOptions(StoreLocation storeLocation, HashAlgorithmName hashAlgorithmName, string thumbprint) =>
-            new SecretOptions(CreateSecretOptionsBase(), storeLocation, hashAlgorithmName, thumbprint);
+        public ISecretOptions CreateSecretOptions(ISecretOptionsBase optionsBase, StoreLocation storeLocation, string thumbprint) =>
+            new SecretOptions(optionsBase, storeLocation, thumbprint);
         /// <summary>
         /// Создать настройки секрета.
         /// </summary>
-        /// <param name="optionsBase">Базовые настройки секрета.</param>
         /// <param name="storeLocation">Хранилище секрета.</param>
-        /// <param name="hashAlgorithmName">Наименование алгоритма шифрования.</param>
         /// <param name="thumbprint">Отпечаток сертификата.</param>
         /// <returns>Экземпляр ISecretOptions.</returns>
-        public ISecretOptions CreateSecretOptions(ISecretOptionsBase optionsBase, StoreLocation storeLocation, HashAlgorithmName hashAlgorithmName, string thumbprint) =>
-            new SecretOptions(optionsBase, storeLocation, hashAlgorithmName, thumbprint);
+        public ISecretOptions CreateSecretOptions(StoreLocation storeLocation, string thumbprint) =>
+            new SecretOptions(CreateSecretOptionsBase(), storeLocation, thumbprint);
         /// <summary>
         /// Создать базовые настройки секретов.
         /// </summary>
@@ -48,9 +46,12 @@ namespace Bushman.Secrets.Services {
         /// <param name="fieldSeparator">Разделитель полей секрета.</param>
         /// <param name="encryptedTagPair">Пара тегов для зашифрованного секрета.</param>
         /// <param name="decryptedTagPair">Пара тегов для расшифрованного секрета.</param>
+        /// <param name="aesKeySize">Размер секретного ключа в битах для симметричного алгоритма шифрования.</param>
+        /// <param name="aesCipherMode">Режим операции симметричного алгоритма.</param>
         /// <returns>Экземпляр ISecretOptionsBase.</returns>
-        public ISecretOptionsBase CreateSecretOptionsBase(Encoding encoding, char fieldSeparator, ITagPair encryptedTagPair, ITagPair decryptedTagPair) =>
-            new SecretOptionsBase(encoding, fieldSeparator, encryptedTagPair, decryptedTagPair);
+        public ISecretOptionsBase CreateSecretOptionsBase(Encoding encoding, char fieldSeparator, ITagPair encryptedTagPair,
+            ITagPair decryptedTagPair, int aesKeySize, CipherMode aesCipherMode) =>
+            new SecretOptionsBase(encoding, fieldSeparator, encryptedTagPair, decryptedTagPair, aesKeySize, aesCipherMode);
         /// <summary>
         /// Создать пару тегов секрета.
         /// </summary>

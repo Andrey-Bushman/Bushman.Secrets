@@ -35,7 +35,7 @@ namespace Bushman.Secrets.Test {
                 SecretOptionsBase.DefaultEncoding,
                 SecretOptionsBase.DefaultFieldSeparator,
                 SecretOptionsBase.DefaultEncryptedTagPair,
-                SecretOptionsBase.DefaultDecryptedTagPair);
+                SecretOptionsBase.DefaultDecryptedTagPair, 256, CipherMode.CBC);
 
             // Вариант #3: Создать пользовательские базовые настройки, отличные от базовых настроек, используемых по умолчанию.
 
@@ -44,7 +44,7 @@ namespace Bushman.Secrets.Test {
             ITagPair encryptedTagPair = secretFactory.CreateTagPair("!!LOCKED", "LOCKED!!");
             ITagPair decryptedTagPair = secretFactory.CreateTagPair("!!UNLOCKED", "UNLOCKED!!");
 
-            ISecretOptionsBase optionsBase3 = secretFactory.CreateSecretOptionsBase(encoding, fieldSeparator, encryptedTagPair, decryptedTagPair);
+            ISecretOptionsBase optionsBase3 = secretFactory.CreateSecretOptionsBase(encoding, fieldSeparator, encryptedTagPair, decryptedTagPair, 256, CipherMode.CBC);
 
             ISecretOptionsBase optionsBase = optionsBase3;
 
@@ -68,11 +68,11 @@ namespace Bushman.Secrets.Test {
 
             // Вариант #1: формирование настроек на основе базовых настроек, используемых по умолчанию.
 
-            ISecretOptions options1 = secretFactory.CreateSecretOptions(storeLocation, HashAlgorithmName.SHA1, thumbprint);
+            ISecretOptions options1 = secretFactory.CreateSecretOptions(storeLocation, thumbprint);
 
             // Вариант #2: формирование настроек на основе пользовательских базовых настроек.
 
-            ISecretOptions options2 = secretFactory.CreateSecretOptions(optionsBase, storeLocation, HashAlgorithmName.SHA1, thumbprint);
+            ISecretOptions options2 = secretFactory.CreateSecretOptions(optionsBase, storeLocation, thumbprint);
 
             ISecretOptions options = options2;
 

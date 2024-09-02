@@ -29,7 +29,7 @@ namespace Bushman.Secrets.Test {
                 store.Close();
 
                 using (certificate) {
-                    return secretFactory.CreateSecretOptions(storeLocation, HashAlgorithmName.SHA512, certificate.Thumbprint);
+                    return secretFactory.CreateSecretOptions(storeLocation, certificate.Thumbprint);
                 }
             }
         }
