@@ -54,12 +54,12 @@
 ```
 {
   "prop1": "Hello World", // Распакованное значение.
-  "prop2": "%%DECRYPTED|CurrentUser|SHA512|00DD37AA6E8AA22E9B11DFC6B8B5DD9706D9FD8C|Hello World|DECRYPTED%%", // Секрет в расшифрованном состоянии.
-  "prop3": "Расшифрованный секрет в составе произвольного текста: %%DECRYPTED|CurrentUser|SHA512|00DD37AA6E8AA22E9B11DFC6B8B5DD9706D9FD8C|Hello World|DECRYPTED%%. Мама мыла раму.",
+  "prop2": "%%DECRYPTED|CurrentUser|00DD37AA6E8AA22E9B11DFC6B8B5DD9706D9FD8C|Hello World|DECRYPTED%%", // Секрет в расшифрованном состоянии.
+  "prop3": "Расшифрованный секрет в составе произвольного текста: %%DECRYPTED|CurrentUser|00DD37AA6E8AA22E9B11DFC6B8B5DD9706D9FD8C|Hello World|DECRYPTED%%. Мама мыла раму.",
 
   // Секрет в зашифрованном состоянии.
-  "prop4": "%%ENCRYPTED|CurrentUser|SHA512|00DD37AA6E8AA22E9B11DFC6B8B5DD9706D9FD8C|cFyOsNujOBp21frIVpIwMT2hjzR6ZDsAtZfs8eWfoVcLiqDqEO+rAEXVmE6KbQMLv+pizS8O/Ri124uM7YvM8NbsKfP2AQI4G/reup5I8kmpGXGkVjevuDuQ0eo5MRbobBPIXPFtvja9zCFn3hpNk/rt243vGMCbhCdIRgXRyOGrHxNuxlB7wHDEkZ+cz68D5cLLYYTF2ctpvgqMHjU7DRg5Vm5NT3N+Rn1FuAFmTa1laBm+Db5CM3yQ1M376FbEU6fiW3xnVrd7i52BREo4T80asmjFLcIxR8R7j5nBpZcSCM4e+wmD6IJGjJDh9Pc79I/s5P2bQduczJIxWIS1mQ==|ENCRYPTED%%",
-  "prop5": "Зашифрованный секрет в составе произвольного текста: %%ENCRYPTED|CurrentUser|SHA512|00DD37AA6E8AA22E9B11DFC6B8B5DD9706D9FD8C|cFyOsNujOBp21frIVpIwMT2hjzR6ZDsAtZfs8eWfoVcLiqDqEO+rAEXVmE6KbQMLv+pizS8O/Ri124uM7YvM8NbsKfP2AQI4G/reup5I8kmpGXGkVjevuDuQ0eo5MRbobBPIXPFtvja9zCFn3hpNk/rt243vGMCbhCdIRgXRyOGrHxNuxlB7wHDEkZ+cz68D5cLLYYTF2ctpvgqMHjU7DRg5Vm5NT3N+Rn1FuAFmTa1laBm+Db5CM3yQ1M376FbEU6fiW3xnVrd7i52BREo4T80asmjFLcIxR8R7j5nBpZcSCM4e+wmD6IJGjJDh9Pc79I/s5P2bQduczJIxWIS1mQ==|ENCRYPTED%%. Мама мыла раму."
+  "prop4": "%%ENCRYPTED|CurrentUser|00DD37AA6E8AA22E9B11DFC6B8B5DD9706D9FD8C|cFyOsNujOBp21frIVpIwMT2hjzR6ZDsAtZfs8eWfoVcLiqDqEO+rAEXVmE6KbQMLv+pizS8O/Ri124uM7YvM8NbsKfP2AQI4G/reup5I8kmpGXGkVjevuDuQ0eo5MRbobBPIXPFtvja9zCFn3hpNk/rt243vGMCbhCdIRgXRyOGrHxNuxlB7wHDEkZ+cz68D5cLLYYTF2ctpvgqMHjU7DRg5Vm5NT3N+Rn1FuAFmTa1laBm+Db5CM3yQ1M376FbEU6fiW3xnVrd7i52BREo4T80asmjFLcIxR8R7j5nBpZcSCM4e+wmD6IJGjJDh9Pc79I/s5P2bQduczJIxWIS1mQ==|ENCRYPTED%%",
+  "prop5": "Зашифрованный секрет в составе произвольного текста: %%ENCRYPTED|CurrentUser|00DD37AA6E8AA22E9B11DFC6B8B5DD9706D9FD8C|cFyOsNujOBp21frIVpIwMT2hjzR6ZDsAtZfs8eWfoVcLiqDqEO+rAEXVmE6KbQMLv+pizS8O/Ri124uM7YvM8NbsKfP2AQI4G/reup5I8kmpGXGkVjevuDuQ0eo5MRbobBPIXPFtvja9zCFn3hpNk/rt243vGMCbhCdIRgXRyOGrHxNuxlB7wHDEkZ+cz68D5cLLYYTF2ctpvgqMHjU7DRg5Vm5NT3N+Rn1FuAFmTa1laBm+Db5CM3yQ1M376FbEU6fiW3xnVrd7i52BREo4T80asmjFLcIxR8R7j5nBpZcSCM4e+wmD6IJGjJDh9Pc79I/s5P2bQduczJIxWIS1mQ==|ENCRYPTED%%. Мама мыла раму."
 }
 ```
 
@@ -72,14 +72,13 @@ _Распаковкой_ секрета называется его замена
 Общая структура записи секрета в тексте следующая:
 
 ```
-SecretOpenTag|SecretStorage|HashAlgorithmName|Thumbprint|Data|SecretCloseTag
+SecretOpenTag|SecretStorage|Thumbprint|Data|SecretCloseTag
 ```
 
 где:
 
   * `SecretOpenTag` - тег открытия секрета. Если секрет зашифрован, то это будет тег `%%ENCRYPTED`. Если расшифрован, то `%%DECRYPTED`.
   * `SecretStorage` - хранилище, в котором находится нужный сертификат. Допустимые значения: `LocalMachine` и `CurrentUser`.
-  * `HashAlgorithmName` - наименование алгоритма хеширования. Допустимые значения: `MD5`, `SHA1`, `SHA256`, `SHA384`, `SHA512`. 
   * `Thumbprint` - отпечаток сертификата, с помощью ключей которого следует выполнять шифрование и расшифровку секрета.
     Это значение можно посмотреть в настройках сертификата на вкладке "Состав".
   * `Data` - данные, сохраняемые в секрете. Если секрет не зашифрован, то этими данными будет обычный текст.

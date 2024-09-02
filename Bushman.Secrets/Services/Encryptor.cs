@@ -179,26 +179,10 @@ namespace Bushman.Secrets.Services {
                         outputStream.Write(aes.IV, 0, aes.IV.Length);
 
                         using (CryptoStream outStreamEncrypted = new CryptoStream(outputStream, transform, CryptoStreamMode.Write)) {
-                            int count = 0;
-                            byte[] data = new byte[aes.BlockSize / 8];
-                            int bytesRead = 0;
+                            
+                            var bytes = secret.Options.OptionsBase.Encoding.GetBytes(secret.Data);
+                            outStreamEncrypted.Write(bytes, 0, bytes.Length);
 
-                            using (MemoryStream inputStream = new MemoryStream()) {
-
-                                using (var sw = new StreamWriter(inputStream, secret.Options.OptionsBase.Encoding, 1024, true)) {
-                                    sw.Write(secret.Data);
-                                    sw.Flush();
-                                }
-                                inputStream.Seek(0, SeekOrigin.Begin);
-
-                                do {
-                                    count = inputStream.Read(data, 0, data.Length);
-                                    outStreamEncrypted.Write(data, 0, count);
-                                    bytesRead += count;
-                                } while (count > 0);
-
-                                inputStream.Close();
-                            }
                             outStreamEncrypted.FlushFinalBlock();
                             outputStream.Flush();
 
@@ -225,7 +209,7 @@ namespace Bushman.Secrets.Services {
             if (secret == null) throw new ArgumentNullException(nameof(secret));
             if (!secret.IsEncrypted) return secret;
             else if (string.IsNullOrWhiteSpace(secret.Data)) {
-                return new Secret(secret.Options, secret.Data, true);
+                return new Secret(secret.Options, secret.Data, false);
             }
 
             X509Certificate2 certificate = null;
@@ -277,7 +261,7 @@ namespace Bushman.Secrets.Services {
                     using (ICryptoTransform transform = aes.CreateDecryptor(KeyDecrypted, IV)) {
 
                         using (MemoryStream outputStream = new MemoryStream()) {
-                            int count = 0;                            
+                            int count = 0;
                             byte[] data = new byte[aes.BlockSize / 8];
 
                             using (CryptoStream outStreamEncrypted = new CryptoStream(outputStream, transform, CryptoStreamMode.Write)) {
@@ -286,7 +270,7 @@ namespace Bushman.Secrets.Services {
                                     outStreamEncrypted.Write(data, 0, count);
                                 } while (count > 0);
 
-                                if (outStreamEncrypted.HasFlushedFinalBlock) outStreamEncrypted.FlushFinalBlock();
+                                outStreamEncrypted.FlushFinalBlock();
 
                                 outputStream.Seek(0, SeekOrigin.Begin);
                                 string decryptedData = secret.Options.OptionsBase.Encoding.GetString(outputStream.ToArray());

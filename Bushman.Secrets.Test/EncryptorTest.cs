@@ -1,4 +1,4 @@
-﻿using Bushman.Secrets.Abstractions.Models;
+using Bushman.Secrets.Abstractions.Models;
 using Bushman.Secrets.Abstractions.Services;
 using Bushman.Secrets.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -14,6 +14,7 @@ namespace Bushman.Secrets.Test {
         [DataRow("|")]
         [DataRow("|||")]
         [DataRow("   ")]
+        [DataRow("")]
         public void Secret_operations_work_fine(string value) {
 
             ISecretFactoryProvider secretFactoryProvider = new SecretFactoryProvider();
@@ -40,12 +41,8 @@ namespace Bushman.Secrets.Test {
             // Создаём зашифрованный секрет.
             ISecret encryptedSecret = encryptor.Encrypt(decryptedSecret);
 
-            Assert.AreNotEqual(decryptedSecret.ToString(), encryptedSecret.ToString());
-
             // Расшифровываем секрет.
             ISecret decryptedSecret2 = encryptor.Decrypt(encryptedSecret);
-
-            
 
             // Распаковываем секрет.
             string expandedValue = encryptor.Expand(encryptedSecret);
@@ -62,16 +59,14 @@ namespace Bushman.Secrets.Test {
 
             // Выполняем парсинг строкового представления секрета.
             ISecret parsedSecret = encryptor.ParseSecret(encryptedSecretString);
-
             ISecret parsedSecret2 = encryptor.ParseSecret(decryptedSecret.ToString());
 
+            Assert.AreNotEqual(decryptedSecret.ToString(), encryptedSecret.ToString());
             Assert.AreEqual(decryptedSecret.ToString(), decryptedSecret2.ToString());
             Assert.AreEqual(value, expandedValue);
-
             Assert.IsTrue(encryptor.IsEncryptedSecret(encryptedSecretString));
             Assert.IsFalse(encryptor.IsDecryptedSecret(encryptedSecretString));
             Assert.IsTrue(encryptor.IsSecret(encryptedSecretString));
-
             Assert.AreEqual(encryptedSecretString, parsedSecret.ToString());
         }
 
