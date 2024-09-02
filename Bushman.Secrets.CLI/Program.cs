@@ -63,7 +63,9 @@ internal class Program {
                 Encoding.GetEncoding(configRoot[ParameterName.Encoding]!),
                 SecretOptionsBase.DefaultFieldSeparator,
                 SecretOptionsBase.DefaultEncryptedTagPair,
-                SecretOptionsBase.DefaultDecryptedTagPair);
+                SecretOptionsBase.DefaultDecryptedTagPair,
+                256,
+                CipherMode.CBC);
 
             IEncryptor encryptor = secretFactory.CreateEncryptor(secretOptionsBase);
 
